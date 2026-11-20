@@ -4,6 +4,9 @@ Dwarfhold is a small browser-based colony and resource-management game. You are 
 
 This is a partially completed starter for the Advanced Web Development practical exam. It is already playable, but it is not yet a finished game. Investigate its existing behavior and extend it according to the [Requirements](REQUIREMENTS.md).
 
+## Project Diary
+The project diary for the practiacal exam can be accessed [here](https://bokuprod-my.sharepoint.com/:w:/g/personal/gloriayoung_office365_boku_ac_at/IQALL-N8-O0XTKg9cjG5ZVxqAenqxQCpctWFAYE8sYUiN3Y?e=GuaPc9).
+
 ## How the game works
 
 The colony advances in **days**. One day passes every eight seconds while the simulation is active. The Pause button stops this clock.
