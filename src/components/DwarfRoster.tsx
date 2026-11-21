@@ -29,7 +29,9 @@ export function DwarfRoster({ dwarves, onAssign }: Props) {
         {dwarves.map((dwarf) => {
           const isAway = dwarf.status === "expedition";
           const isUnavailable =
-            dwarf.status === "expedition" || dwarf.status === "resting";
+            dwarf.status === "expedition" ||
+            dwarf.status === "resting" ||
+            dwarf.status === "forging";
           const specialty = dwarf.specialty
             ? `Skilled in ${jobLabel(dwarf.specialty)}`
             : "Generalist";

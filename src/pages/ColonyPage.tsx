@@ -21,10 +21,14 @@ export function ColonyPage() {
     if (
       !current ||
       current.status === "expedition" ||
-      current.status === "resting"
+      current.status === "resting" ||
+      current.status === "forging"
     ) {
       const next = colony.dwarves.find(
-        (dwarf) => dwarf.status !== "expedition" && dwarf.status !== "resting",
+        (dwarf) =>
+          dwarf.status !== "expedition" &&
+          dwarf.status !== "resting" &&
+          dwarf.status !== "forging",
       );
       if (next) {
         setExpeditionDwarf(next.id);
@@ -37,6 +41,7 @@ export function ColonyPage() {
     !selected ||
     selected.status === "expedition" ||
     selected.status === "resting" ||
+    selected.status === "forging" ||
     expeditionPending;
   const awayDwarf = colony.dwarves.find(
     (dwarf) => dwarf.status === "expedition",
@@ -127,7 +132,9 @@ export function ColonyPage() {
               {colony.dwarves
                 .filter(
                   (dwarf) =>
-                    dwarf.status !== "expedition" && dwarf.status !== "resting",
+                    dwarf.status !== "expedition" &&
+                    dwarf.status !== "resting" &&
+                    dwarf.status !== "forging",
                 )
                 .map((dwarf) => (
                   <option key={dwarf.id} value={dwarf.id}>

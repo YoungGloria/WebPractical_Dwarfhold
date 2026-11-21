@@ -9,7 +9,8 @@ export const production: Record<Exclude<JobType, null>, Partial<Resources>> = {
 export const isProducing = (dwarf: Dwarf) =>
   dwarf.assignment !== null &&
   dwarf.status !== "expedition" &&
-  dwarf.status !== "resting";
+  dwarf.status !== "resting" &&
+  dwarf.status !== "forging";
 
 export function advanceDay(state: ColonyState): ColonyState {
   const resources = { ...state.resources };
