@@ -1,0 +1,43 @@
+import type { ColonyState } from "./types.ts";
+
+export function createInitialState(): ColonyState {
+  return {
+    day: 12,
+    resources: {
+      wood: 14,
+      stone: 9,
+      food: 18,
+      tools: 1,
+    },
+    dwarves: [
+      {
+        id: "dwarf-1",
+        name: "Bromli Copperkeg",
+        title: "Hold Warden",
+        icon: "🧔🏻",
+        assignment: "mining",
+        status: "working",
+        specialty: "mining",
+      },
+      {
+        id: "dwarf-2",
+        name: "Yrsa Flintbraid",
+        title: "Trail Scout",
+        icon: "🧔🏼‍♀️",
+        assignment: "woodcutting",
+        status: "working",
+        specialty: "woodcutting",
+      },
+      {
+        id: "dwarf-3",
+        name: "Dori Ashmantle",
+        title: "Stone Singer",
+        icon: "🧔🏽",
+        assignment: null,
+        status: "idle",
+      },
+    ],
+    log: [],
+    logSeq: 0,
+  };
+}

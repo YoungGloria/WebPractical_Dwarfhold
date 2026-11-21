@@ -22,6 +22,8 @@ export interface ColonyState {
   day: number;
   resources: Resources;
   dwarves: Dwarf[];
+  log: Activity[];
+  logSeq: number;
 }
 
 export interface ExpeditionResult {
