@@ -8,7 +8,7 @@ export function assignJob(
   job: JobType,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === id);
-  if (!dwarf) return state;
+  if (!dwarf || dwarf.status === "expedition") return state;
 
   const dwarves = state.dwarves.map((d) =>
     d.id === id
@@ -46,13 +46,17 @@ export function craftToolAction(state: ColonyState): ColonyState {
   );
 }
 
+/* 
+D4 functions for expeditions. May be moved to simulations.ts or seperate file later on
+*/
+
 export function startExpeditionAction(
   state: ColonyState,
   dwarfId: string,
   destination: string,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
-  if (!dwarf) return state;
+  if (!dwarf || dwarf?.status === "expedition") return state; // Dwarf not found or already on an expedition
 
   const dwarves = state.dwarves.map((d) =>
     d.id === dwarfId ? { ...d, status: "expedition" as const } : d,
@@ -70,6 +74,9 @@ export function completeExpeditionAction(
   rewards: Partial<Record<ResourceKey, number>>,
   message: string,
 ): ColonyState {
+  const dwarf = state.dwarves.find((d) => d.id === dwarfId);
+  if (dwarf?.status !== "expedition") return state; // using optional chaining to check: Dwarf not found or not on an expedition?
+
   const resources = Object.entries(rewards).reduce(
     (all, [key, amount]) => ({
       ...all,
@@ -95,6 +102,9 @@ export function failExpeditionAction(
   dwarfId: string,
   errorMessage: string,
 ): ColonyState {
+  const dwarf = state.dwarves.find((d) => d.id === dwarfId);
+  if (dwarf?.status !== "expedition") return state; // Using optional chaining to check:Dwarf not found or not on an expedition
+
   const dwarves = state.dwarves.map((d) =>
     d.id === dwarfId
       ? {

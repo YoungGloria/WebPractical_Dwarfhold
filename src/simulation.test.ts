@@ -16,6 +16,8 @@ describe("colony simulation", () => {
           status: "working",
         },
       ],
+      log: [],
+      logSeq: 0,
     };
     expect(advanceDay(state)).toMatchObject({
       day: 2,
