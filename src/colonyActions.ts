@@ -8,7 +8,12 @@ export function assignJob(
   job: JobType,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === id);
-  if (!dwarf || dwarf.status === "expedition" || dwarf.status === "resting")
+  if (
+    !dwarf ||
+    dwarf.status === "expedition" ||
+    dwarf.status === "resting" ||
+    dwarf.status === "forging"
+  )
     return state;
 
   const dwarves = state.dwarves.map((d) =>
@@ -27,9 +32,21 @@ export function assignJob(
   );
 }
 
-export function craftToolAction(state: ColonyState): ColonyState {
+export function craftToolAction(
+  state: ColonyState,
+  dwarfId: string,
+): ColonyState {
+  const dwarf = state.dwarves.find((d) => d.id === dwarfId);
+  if (
+    !dwarf?.specialty ||
+    dwarf.status === "expedition" ||
+    dwarf.status === "resting" ||
+    dwarf.status === "forging"
+  )
+    return state;
+
   if (state.resources.wood < 3 || state.resources.stone < 2) {
-    return log(state, "The forge needs more timber and stone.", "warning");
+    return state;
   }
 
   return log(
@@ -39,10 +56,35 @@ export function craftToolAction(state: ColonyState): ColonyState {
         ...state.resources,
         wood: state.resources.wood - 3,
         stone: state.resources.stone - 2,
+      },
+      dwarves: state.dwarves.map((d) =>
+        d.id === dwarfId ? { ...d, status: "forging" as const } : d,
+      ),
+    },
+    `${dwarf.name} started forging a beautiful tool.`,
+    "good",
+  );
+}
+
+export function completeCraftToolAction(
+  state: ColonyState,
+  dwarfId: string,
+): ColonyState {
+  const dwarf = state.dwarves.find((d) => d.id === dwarfId);
+  if (dwarf?.status !== "forging") return state;
+
+  return log(
+    {
+      ...state,
+      resources: {
+        ...state.resources,
         tools: state.resources.tools + 1,
       },
+      dwarves: state.dwarves.map((d) =>
+        d.id === dwarfId ? { ...d, status: "resting" as const } : d,
+      ),
     },
-    "A sturdy iron tool joins the stores.",
+    `${dwarf.name} completed the tool and is resting until tomorrow.`,
     "good",
   );
 }
