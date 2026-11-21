@@ -80,9 +80,9 @@ describe("D4 expeditions", () => {
         "old-mine",
       );
 
-      expect(
-        startExpeditionAction(travelling, "dwarf-1", "crystal-cave"),
-      ).toBe(travelling);
+      expect(startExpeditionAction(travelling, "dwarf-1", "crystal-cave")).toBe(
+        travelling,
+      );
     });
 
     it("does not allow a job assignment while travelling", () => {
@@ -172,9 +172,9 @@ describe("D4 expeditions", () => {
     it("ignores a failure for a dwarf that never started travelling", () => {
       const state = createExpeditionState();
 
-      expect(
-        failExpeditionAction(state, "dwarf-1", "Stale failure"),
-      ).toBe(state);
+      expect(failExpeditionAction(state, "dwarf-1", "Stale failure")).toBe(
+        state,
+      );
     });
   });
 
@@ -229,9 +229,9 @@ describe("D4 expeditions", () => {
         "The old mine yielded supplies.",
       );
 
-      expect(
-        failExpeditionAction(completed, "dwarf-1", "Late failure"),
-      ).toBe(completed);
+      expect(failExpeditionAction(completed, "dwarf-1", "Late failure")).toBe(
+        completed,
+      );
     });
 
     it("allows a new expedition only after the first has finished", () => {
@@ -287,5 +287,4 @@ describe("D4 expeditions", () => {
       expect(completed.resources.tools).toBe(2);
     });
   });
-
 });

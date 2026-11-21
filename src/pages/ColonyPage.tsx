@@ -9,15 +9,19 @@ export function ColonyPage() {
   const { colony, activities, expeditionPending, assignDwarf, sendExpedition } =
     useColony();
   const [destination, setDestination] = useState("crystal-cave");
-  const [expeditionDwarf, setExpeditionDwarf] = useState( 
+  const [expeditionDwarf, setExpeditionDwarf] = useState(
     () => colony.dwarves.find((d) => d.status !== "expedition")?.id ?? "", // Default to the first available dwarf
   );
 
   // Ensure the selected dwarf is always valid and available - rection to updates in the colony state
   useEffect(() => {
-    const current = colony.dwarves.find((dwarf) => dwarf.id === expeditionDwarf);
+    const current = colony.dwarves.find(
+      (dwarf) => dwarf.id === expeditionDwarf,
+    );
     if (!current || current.status === "expedition") {
-      const next = colony.dwarves.find((dwarf) => dwarf.status !== "expedition");
+      const next = colony.dwarves.find(
+        (dwarf) => dwarf.status !== "expedition",
+      );
       if (next) {
         setExpeditionDwarf(next.id);
       }
@@ -25,8 +29,11 @@ export function ColonyPage() {
   }, [colony.dwarves, expeditionDwarf]);
 
   const selected = colony.dwarves.find((d) => d.id === expeditionDwarf);
-  const blocked = !selected || selected.status === "expedition" || expeditionPending;
-  const awayDwarf = colony.dwarves.find((dwarf) => dwarf.status === "expedition");
+  const blocked =
+    !selected || selected.status === "expedition" || expeditionPending;
+  const awayDwarf = colony.dwarves.find(
+    (dwarf) => dwarf.status === "expedition",
+  );
 
   const dailyOutput = colony.dwarves.reduce<Record<ResourceKey, number>>(
     (total, dwarf) => {
@@ -112,11 +119,7 @@ export function ColonyPage() {
               {colony.dwarves.map((dwarf) => {
                 const available = dwarf.status !== "expedition";
                 return (
-                  <option
-                    key={dwarf.id}
-                    value={dwarf.id}
-                    disabled={!available}
-                  >
+                  <option key={dwarf.id} value={dwarf.id} disabled={!available}>
                     {dwarf.name}
                     {!available ? " (away)" : ""}
                   </option>
