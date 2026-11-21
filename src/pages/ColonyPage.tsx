@@ -6,13 +6,8 @@ import { useColony } from "../state/ColonyContext";
 import type { ResourceKey } from "../types";
 
 export function ColonyPage() {
-  const {
-    colony,
-    activities,
-    expeditionPending,
-    assignDwarf,
-    sendExpedition,
-  } = useColony();
+  const { colony, activities, expeditionPending, assignDwarf, sendExpedition } =
+    useColony();
   const [destination, setDestination] = useState("crystal-cave");
   const [expeditionDwarf, setExpeditionDwarf] = useState("dwarf-3");
 
@@ -61,9 +56,8 @@ export function ColonyPage() {
                 <h3>{jobLabel(job)}</h3>
                 <p>
                   {
-                    colony.dwarves.filter(
-                      (dwarf) => dwarf.assignment === job,
-                    ).length
+                    colony.dwarves.filter((dwarf) => dwarf.assignment === job)
+                      .length
                   }{" "}
                   assigned
                 </p>
@@ -120,7 +114,11 @@ export function ColonyPage() {
 
           <button
             disabled={expeditionPending}
-            onClick={() => sendExpedition(expeditionDwarf, destination)}
+            onClick={() =>
+              void sendExpedition(expeditionDwarf, destination).catch((error) =>
+                console.error("Failed to send expedition:", error),
+              )
+            } // onClick expects a function that returns void
           >
             {expeditionPending ? "Beyond the gate…" : "Send expedition"}
           </button>

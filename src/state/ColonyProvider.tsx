@@ -1,12 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { beginExpedition } from "../api";
 import { advanceDay, jobLabel } from "../simulation";
-import type {
-  Activity,
-  ColonyState,
-  JobType,
-  ResourceKey,
-} from "../types";
+import type { Activity, ColonyState, JobType, ResourceKey } from "../types";
 import { ColonyContext, type ColonyContextValue } from "./ColonyContext";
 
 const initialState: ColonyState = {

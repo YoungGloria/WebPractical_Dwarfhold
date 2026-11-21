@@ -1,0 +1,9 @@
+# Build & dependencies
+dist
+node_modules
+
+# Lockfiles & generated docs
+package-lock.json
+docs/API.md
+REQUIREMENTS.md
+README.md
