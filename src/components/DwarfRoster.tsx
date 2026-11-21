@@ -28,6 +28,8 @@ export function DwarfRoster({ dwarves, onAssign }: Props) {
       <div className="dwarf-list">
         {dwarves.map((dwarf) => {
           const isAway = dwarf.status === "expedition";
+          const isUnavailable =
+            dwarf.status === "expedition" || dwarf.status === "resting";
           const specialty = dwarf.specialty
             ? `Skilled in ${jobLabel(dwarf.specialty)}`
             : "Generalist";
@@ -47,7 +49,7 @@ export function DwarfRoster({ dwarves, onAssign }: Props) {
 
                 <select
                   value={dwarf.assignment ?? ""}
-                  disabled={isAway}
+                  disabled={isUnavailable}
                   onChange={(event) =>
                     onAssign(dwarf.id, (event.target.value || null) as JobType)
                   }

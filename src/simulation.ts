@@ -1,4 +1,4 @@
-import type { ColonyState, JobType, Resources } from "./types";
+import type { ColonyState, Dwarf, JobType, Resources } from "./types";
 
 export const production: Record<Exclude<JobType, null>, Partial<Resources>> = {
   woodcutting: { wood: 3 },
@@ -6,11 +6,24 @@ export const production: Record<Exclude<JobType, null>, Partial<Resources>> = {
   farming: { food: 4 },
 };
 
+export const isProducing = (dwarf: Dwarf) =>
+  dwarf.assignment !== null &&
+  dwarf.status !== "expedition" &&
+  dwarf.status !== "resting";
+
 export function advanceDay(state: ColonyState): ColonyState {
   const resources = { ...state.resources };
+  const dwarves = state.dwarves.map((dwarf) =>
+    dwarf.status === "resting"
+      ? {
+          ...dwarf,
+          status: dwarf.assignment ? ("working" as const) : ("idle" as const),
+        }
+      : dwarf,
+  );
 
-  state.dwarves.forEach((dwarf) => {
-    if (!dwarf.assignment || dwarf.status === "expedition") return; // Skip dwarves without an assignment or on an expedition
+  dwarves.forEach((dwarf) => {
+    if (!dwarf.assignment || !isProducing(dwarf)) return; // Skip dwarves without an assignment or on an expedition
 
     const output = production[dwarf.assignment];
 
@@ -21,7 +34,7 @@ export function advanceDay(state: ColonyState): ColonyState {
 
   resources.food = Math.max(0, resources.food - state.dwarves.length);
 
-  return { ...state, day: state.day + 1, resources };
+  return { ...state, day: state.day + 1, resources, dwarves };
 }
 
 export const jobLabel = (job: JobType) =>
