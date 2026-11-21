@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Chronicle } from "../components/Chronicle";
 import { DwarfRoster } from "../components/DwarfRoster";
-import { jobLabel, production } from "../simulation";
+import { jobLabel, production, isProducing } from "../simulation";
 import { useColony } from "../state/ColonyContext";
 import type { ResourceKey } from "../types";
 
@@ -18,9 +18,13 @@ export function ColonyPage() {
     const current = colony.dwarves.find(
       (dwarf) => dwarf.id === expeditionDwarf,
     );
-    if (!current || current.status === "expedition") {
+    if (
+      !current ||
+      current.status === "expedition" ||
+      current.status === "resting"
+    ) {
       const next = colony.dwarves.find(
-        (dwarf) => dwarf.status !== "expedition",
+        (dwarf) => dwarf.status !== "expedition" && dwarf.status !== "resting",
       );
       if (next) {
         setExpeditionDwarf(next.id);
@@ -30,14 +34,18 @@ export function ColonyPage() {
 
   const selected = colony.dwarves.find((d) => d.id === expeditionDwarf);
   const blocked =
-    !selected || selected.status === "expedition" || expeditionPending;
+    !selected ||
+    selected.status === "expedition" ||
+    selected.status === "resting" ||
+    expeditionPending;
   const awayDwarf = colony.dwarves.find(
     (dwarf) => dwarf.status === "expedition",
   );
 
   const dailyOutput = colony.dwarves.reduce<Record<ResourceKey, number>>(
     (total, dwarf) => {
-      if (dwarf.assignment) {
+      if (dwarf.assignment && isProducing(dwarf)) {
+        // ensure the dwarf has an assignment and is producing (ie not on an expedition)
         const output = production[dwarf.assignment];
         Object.entries(output).forEach(([resource, amount]) => {
           total[resource as ResourceKey] += amount ?? 0;
@@ -116,15 +124,16 @@ export function ColonyPage() {
               value={expeditionDwarf}
               onChange={(event) => setExpeditionDwarf(event.target.value)}
             >
-              {colony.dwarves.map((dwarf) => {
-                const available = dwarf.status !== "expedition";
-                return (
-                  <option key={dwarf.id} value={dwarf.id} disabled={!available}>
+              {colony.dwarves
+                .filter(
+                  (dwarf) =>
+                    dwarf.status !== "expedition" && dwarf.status !== "resting",
+                )
+                .map((dwarf) => (
+                  <option key={dwarf.id} value={dwarf.id}>
                     {dwarf.name}
-                    {!available ? " (away)" : ""}
                   </option>
-                );
-              })}
+                ))}
             </select>
           </label>
 

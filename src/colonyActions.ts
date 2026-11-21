@@ -8,7 +8,8 @@ export function assignJob(
   job: JobType,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === id);
-  if (!dwarf || dwarf.status === "expedition") return state;
+  if (!dwarf || dwarf.status === "expedition" || dwarf.status === "resting")
+    return state;
 
   const dwarves = state.dwarves.map((d) =>
     d.id === id
@@ -86,12 +87,7 @@ export function completeExpeditionAction(
   );
 
   const dwarves = state.dwarves.map((d) =>
-    d.id === dwarfId
-      ? {
-          ...d,
-          status: d.assignment ? ("working" as const) : ("idle" as const),
-        }
-      : d,
+    d.id === dwarfId ? { ...d, status: "resting" as const } : d,
   );
 
   return log({ ...state, resources, dwarves }, message, "good");
@@ -106,12 +102,7 @@ export function failExpeditionAction(
   if (dwarf?.status !== "expedition") return state; // Using optional chaining to check:Dwarf not found or not on an expedition
 
   const dwarves = state.dwarves.map((d) =>
-    d.id === dwarfId
-      ? {
-          ...d,
-          status: d.assignment ? ("working" as const) : ("idle" as const),
-        }
-      : d,
+    d.id === dwarfId ? { ...d, status: "resting" as const } : d,
   );
 
   return log({ ...state, dwarves }, errorMessage, "warning");
