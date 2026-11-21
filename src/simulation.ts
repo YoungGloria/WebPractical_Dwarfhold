@@ -10,7 +10,7 @@ export function advanceDay(state: ColonyState): ColonyState {
   const resources = { ...state.resources };
 
   state.dwarves.forEach((dwarf) => {
-    if (!dwarf.assignment) return;
+    if (!dwarf.assignment || dwarf.status === "expedition") return; // Skip dwarves without an assignment or on an expedition
 
     const output = production[dwarf.assignment];
 

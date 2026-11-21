@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { beginExpedition } from "../api";
 import { createInitialState } from "../initialState";
 import { advanceDay } from "../simulation";
@@ -15,7 +15,7 @@ import { ColonyContext, type ColonyContextValue } from "./ColonyContext";
 export function ColonyProvider({ children }: { children: ReactNode }) {
   const [colony, setColony] = useState(createInitialState);
   const [paused, setPaused] = useState(false);
-  const [expeditionPending, setExpeditionPending] = useState(false);
+  const inFlight = useRef(new Set<string>()); // Track dwarves currently on expeditions
 
   useEffect(() => {
     if (paused) return;
@@ -29,6 +29,9 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   }, [paused]);
 
   function assignDwarf(id: string, assignment: JobType) {
+    const dwarf = colony.dwarves.find((d) => d.id === id);
+    if (dwarf?.status === "expedition") return; // Prevent assigning a job to a dwarf on an expedition
+
     setColony((current) => assignJob(current, id, assignment));
   }
 
@@ -37,16 +40,18 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   }
 
   async function sendExpedition(dwarfId: string, destination: string) {
-    const dwarfExists = colony.dwarves.some((item) => item.id === dwarfId);
-    if (!dwarfExists) return;
+    const dwarf = colony.dwarves.find((d) => d.id === dwarfId);
+    if (dwarf?.status === "expedition" || inFlight.current.has(dwarfId)) return; // Prevent sending a dwarf on an expedition if they are already on one or if the expedition is in flight
 
-    setExpeditionPending(true);
+    inFlight.current.add(dwarfId);
     setColony((current) =>
       startExpeditionAction(current, dwarfId, destination),
     );
 
+    const requestId = crypto.randomUUID();
+
     try {
-      const result = await beginExpedition(dwarfId, destination);
+      const result = await beginExpedition(dwarfId, destination, requestId);
       setColony((current) =>
         completeExpeditionAction(
           current,
@@ -66,9 +71,13 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
         ),
       );
     } finally {
-      setExpeditionPending(false);
+      inFlight.current.delete(dwarfId);
     }
   }
+
+  const expeditionPending = colony.dwarves.some(
+    (d) => d.status === "expedition",
+  );
 
   const value: ColonyContextValue = {
     colony,

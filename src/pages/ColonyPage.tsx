@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Chronicle } from "../components/Chronicle";
 import { DwarfRoster } from "../components/DwarfRoster";
 import { jobLabel, production } from "../simulation";
@@ -9,7 +9,31 @@ export function ColonyPage() {
   const { colony, activities, expeditionPending, assignDwarf, sendExpedition } =
     useColony();
   const [destination, setDestination] = useState("crystal-cave");
-  const [expeditionDwarf, setExpeditionDwarf] = useState("dwarf-3");
+  const [expeditionDwarf, setExpeditionDwarf] = useState(
+    () => colony.dwarves.find((d) => d.status !== "expedition")?.id ?? "", // Default to the first available dwarf
+  );
+
+  // Ensure the selected dwarf is always valid and available - rection to updates in the colony state
+  useEffect(() => {
+    const current = colony.dwarves.find(
+      (dwarf) => dwarf.id === expeditionDwarf,
+    );
+    if (!current || current.status === "expedition") {
+      const next = colony.dwarves.find(
+        (dwarf) => dwarf.status !== "expedition",
+      );
+      if (next) {
+        setExpeditionDwarf(next.id);
+      }
+    }
+  }, [colony.dwarves, expeditionDwarf]);
+
+  const selected = colony.dwarves.find((d) => d.id === expeditionDwarf);
+  const blocked =
+    !selected || selected.status === "expedition" || expeditionPending;
+  const awayDwarf = colony.dwarves.find(
+    (dwarf) => dwarf.status === "expedition",
+  );
 
   const dailyOutput = colony.dwarves.reduce<Record<ResourceKey, number>>(
     (total, dwarf) => {
@@ -92,11 +116,15 @@ export function ColonyPage() {
               value={expeditionDwarf}
               onChange={(event) => setExpeditionDwarf(event.target.value)}
             >
-              {colony.dwarves.map((dwarf) => (
-                <option key={dwarf.id} value={dwarf.id}>
-                  {dwarf.name}
-                </option>
-              ))}
+              {colony.dwarves.map((dwarf) => {
+                const available = dwarf.status !== "expedition";
+                return (
+                  <option key={dwarf.id} value={dwarf.id} disabled={!available}>
+                    {dwarf.name}
+                    {!available ? " (away)" : ""}
+                  </option>
+                );
+              })}
             </select>
           </label>
 
@@ -113,7 +141,7 @@ export function ColonyPage() {
           </label>
 
           <button
-            disabled={expeditionPending}
+            disabled={blocked}
             onClick={() =>
               void sendExpedition(expeditionDwarf, destination).catch((error) =>
                 console.error("Failed to send expedition:", error),
@@ -123,8 +151,11 @@ export function ColonyPage() {
             {expeditionPending ? "Beyond the gate…" : "Send expedition"}
           </button>
           <p>
-            A result returns in one request. The selected dwarf is unavailable
-            while travelling.
+            {awayDwarf
+              ? `${awayDwarf.name} is away beyond the gate. A result returns in one request…`
+              : selected
+                ? `${selected.name} is ready. A result returns in one request…`
+                : "No scout available. A result returns in one request…"}
           </p>
         </section>
 

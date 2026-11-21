@@ -4,6 +4,7 @@ import express from "express";
 const app = express();
 const port = Number(process.env.PORT ?? 4200);
 let expeditionNumber = 16;
+const processed = new Map();
 
 const outcomes = {
   "crystal-cave": {
@@ -23,7 +24,36 @@ app.get("/api/health", (_req, res) =>
   res.json({ ok: true, service: "dwarfhold" }),
 );
 
-app.post("/api/expeditions", (req, res) => {
+// Expeditions endpoint - Adjusted to meet D4 requirements by:
+// 1. Validate request (requires dwarfId and destination)
+// 2. Await existing promise from processed Map if requestId was already seen
+// 3. Reject intentional/simulated failures (503) before mutating state
+// 4. Look up outcome for new expedition (404 if destination has none)
+// 5. Increment expeditionNumber on success and resolve the cached promise by requestId
+
+app.post("/api/expeditions", async (req, res) => {
+  const { dwarfId, destination, requestId } = req.body ?? {};
+
+  // Validate request
+  if (typeof dwarfId !== "string" || typeof destination !== "string") {
+    return res
+      .status(400)
+      .json({ error: "dwarfId and destination are required" });
+  }
+
+  // Check if requestId is provided and valid - this correspods to a cached response in the processed Map
+  const hasRequestId = typeof requestId === "string" && requestId.length > 0;
+
+  if (hasRequestId && processed.has(requestId)) {
+    const entry = processed.get(requestId);
+    try {
+      const body = await entry.promise;
+      return res.json(body);
+    } catch (err) {
+      return res.status(err.status ?? 500).json({ error: err.message });
+    }
+  }
+
   // simulated latency
   const latency = Math.max(
     0,
@@ -33,35 +63,53 @@ app.post("/api/expeditions", (req, res) => {
     ),
   );
 
-  setTimeout(() => {
-    const { dwarfId, destination } = req.body ?? {};
+  // Simulate processing the new expedition request
+  const runExpedition = () =>
+    new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (req.query.fail === "true" || destination === "blocked-pass") {
+          return reject({
+            status: 503,
+            message:
+              "Rockfall has sealed the route. The company heard no signal.",
+          });
+        }
 
-    if (typeof dwarfId !== "string" || typeof destination !== "string") {
-      return res
-        .status(400)
-        .json({ error: "dwarfId and destination are required" });
-    }
-    if (req.query.fail === "true" || destination === "blocked-pass") {
-      return res.status(503).json({
-        error: "Rockfall has sealed the route. The company heard no signal.",
-      });
-    }
+        // Look up the outcome for the expedition destination
+        const outcome = outcomes[destination];
 
-    const outcome = outcomes[destination];
+        // If no outcome is found for the destination, return a 404 error
+        if (!outcome) {
+          return reject({
+            status: 404,
+            message: "That destination is not on the hold map",
+          });
+        }
 
-    if (!outcome)
-      return res
-        .status(404)
-        .json({ error: "That destination is not on the hold map" });
+        // Outcome found, increment expeditionNumber for the new expedition and resolve the promise
+        expeditionNumber += 1;
 
-    expeditionNumber += 1;
+        const body = {
+          expeditionId: `expedition-${expeditionNumber}`,
+          status: "completed",
+          ...outcome,
+        };
 
-    res.json({
-      expeditionId: `exp-${expeditionNumber}`,
-      status: "completed",
-      ...outcome,
+        resolve(body);
+      }, latency);
     });
-  }, latency);
+
+  const promise = runExpedition();
+  if (hasRequestId) {
+    processed.set(requestId, { promise });
+  }
+
+  try {
+    const body = await promise;
+    return res.json(body);
+  } catch (err) {
+    return res.status(err.status ?? 500).json({ error: err.message });
+  }
 });
 
 app.listen(port, () =>
