@@ -35,9 +35,7 @@ export function advanceDay(state: ColonyState): ColonyState {
       }
     const output = production[dwarf.assignment];
 
-    if(isFamine(state)) {
-        modifier -= 1;
-    }
+    if(isFamine(state)) { modifier -= 1; }
 
     Object.entries(output).forEach(([resource, amount]) => {
       resources[resource as keyof Resources] += amount ? amount + modifier : 0;
