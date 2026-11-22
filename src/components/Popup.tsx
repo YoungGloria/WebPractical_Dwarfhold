@@ -22,7 +22,7 @@ export function Popup({ header, subHeader, message, onClose }: PopupProps) {
         <button className="close" onClick={onClose}>
           Close
         </button>
-      )}
+      )}  
     </section>
   );
 }
