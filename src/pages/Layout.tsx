@@ -18,7 +18,6 @@ export function Layout() {
   } = useColony();
 
   const hasActiveCrafts = Object.keys(craftCountdowns).length > 0;
- 
 
   return (
     <main>
