@@ -7,8 +7,14 @@ import type { ResourceKey } from "../types";
 import { isFamine } from "../utils";
 
 export function ColonyPage() {
-  const { colony, activities, expeditionPending, assignDwarf, sendExpedition } =
-    useColony();
+  const {
+    colony,
+    activities,
+    expeditionPending,
+    expeditionCountdowns,
+    assignDwarf,
+    sendExpedition,
+  } = useColony();
   const [destination, setDestination] = useState("crystal-cave");
   const [expeditionDwarf, setExpeditionDwarf] = useState(
     () => colony.dwarves.find((d) => d.status !== "expedition")?.id ?? "", // Default to the first available dwarf
@@ -165,11 +171,7 @@ export function ColonyPage() {
 
           <button
             disabled={blocked}
-            onClick={() =>
-              void sendExpedition(expeditionDwarf, destination).catch((error) =>
-                console.error("Failed to send expedition:", error),
-              )
-            } // onClick expects a function that returns void
+            onClick={() => sendExpedition(expeditionDwarf, destination)} // onClick expects a function that returns void
           >
             {expeditionPending ? "Beyond the gate…" : "Send expedition"}
           </button>
@@ -180,6 +182,15 @@ export function ColonyPage() {
                 ? `${selected.name} is ready. A result returns in one request…`
                 : "No scout available. A result returns in one request…"}
           </p>
+          {Object.entries(expeditionCountdowns).map(([dwarfId, seconds]) => {
+            const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
+            if (!dwarf) return null;
+            return (
+              <p className="craft-progress" key={dwarfId}>
+                Expedition ready in: {seconds}s — {dwarf.name} is travelling
+              </p>
+            );
+          })}
         </section>
 
         <Chronicle activities={activities} />

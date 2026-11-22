@@ -13,9 +13,12 @@ export function Layout() {
     dayPhase,
     daySecondsLeft,
     craftCountdowns,
+    restoreNotice,
+    dismissRestoreNotice,
   } = useColony();
 
   const hasActiveCrafts = Object.keys(craftCountdowns).length > 0;
+ 
 
   return (
     <main>
@@ -52,7 +55,7 @@ export function Layout() {
         <NavLink to="/forge">Forge</NavLink>
       </nav>
 
-      {isFamine(useColony().colony) ? (
+      {isFamine(colony) ? (
         <Popup
           header="Famine"
           subHeader="It has been a long time since they have eaten."
@@ -62,6 +65,10 @@ export function Layout() {
         />
       ) : (
         ""
+      )}
+
+      {restoreNotice && (
+        <Popup {...restoreNotice} onClose={dismissRestoreNotice} />
       )}
 
       <ResourceBar resources={colony.resources} />
