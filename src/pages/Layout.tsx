@@ -5,7 +5,8 @@ import { Popup } from "../components/Popup";
 import { isFamine } from "../utils";
 
 export function Layout() {
-  const { colony, paused, togglePaused } = useColony();
+  const { colony, paused, togglePaused, restoreNotice, dismissRestoreNotice } =
+    useColony();
 
   return (
     <main>
@@ -42,7 +43,7 @@ export function Layout() {
         <NavLink to="/forge">Forge</NavLink>
       </nav>
 
-      {isFamine(useColony().colony) ? (
+      {isFamine(colony) ? (
         <Popup
           header="Famine"
           subHeader="It has been a long time since they have eaten."
@@ -53,6 +54,10 @@ export function Layout() {
       ) : (
         ""
       )}
+
+      {restoreNotice && (
+  <Popup {...restoreNotice} onClose={dismissRestoreNotice} />
+)}
 
       <ResourceBar resources={colony.resources} />
       <Outlet />
