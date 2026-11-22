@@ -15,6 +15,11 @@ const outcomes = {
     rewards: { stone: 12, wood: 2 },
     message: "The old mine still holds good stone and usable supports.",
   },
+  "abandoned-fortifications": {
+    rewards: { stone: 4, wood: 3, tools: 1, weapons: 1 },
+    message: "The abandoned Fortifications are already loot. But there where some tools and weapons under a collapsed building.",
+  },
+
 };
 
 app.use(cors());
