@@ -47,7 +47,7 @@ export function Layout() {
           header="Famine"
           subHeader="It has been a long time since they have eaten."
           message={
-            "Your people are starving. Feed them.\nYour workers output is cut in half."
+            "Your people are starving. Feed them.\nYour workers output is reduced by 1."
           }
         />
       ) : (
