@@ -18,6 +18,7 @@ export function createInitialState(): ColonyState {
         assignment: "mining",
         status: "working",
         specialty: "mining",
+        wasOnExpedition: false,
       },
       {
         id: "dwarf-2",
@@ -27,6 +28,7 @@ export function createInitialState(): ColonyState {
         assignment: "woodcutting",
         status: "working",
         specialty: "woodcutting",
+        wasOnExpedition: false,
       },
       {
         id: "dwarf-3",
@@ -35,6 +37,7 @@ export function createInitialState(): ColonyState {
         icon: "🧔🏽",
         assignment: null,
         status: "idle",
+        wasOnExpedition: false,
       },
     ],
     log: [],

@@ -16,6 +16,7 @@ export interface Dwarf {
   assignment: JobType;
   status: DwarfStatus;
   specialty?: Exclude<JobType, null>;
+  wasOnExpedition: boolean;
 }
 
 export interface ColonyState {
