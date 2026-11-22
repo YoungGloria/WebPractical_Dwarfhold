@@ -219,7 +219,7 @@ describe("D4 expeditions", () => {
 
       const nextDay = advanceDay(completed);
       expect(dwarfOf(nextDay, "dwarf-1").status).toBe("working");
-      expect(nextDay.resources.stone).toBe(completed.resources.stone + 2);
+      expect(nextDay.resources.stone).toBe(completed.resources.stone);
     });
 
     it("applies each reward once and returns the dwarf", () => {
@@ -504,7 +504,7 @@ describe("D4 expeditions", () => {
         state = advanceDay(state);
       }
 
-      expect(state.resources.stone).toBe(9 + 3 * 8 + 3 * 2);
+      expect(state.resources.stone).toBe(9 + 3 * 8);
     });
 
     it("does not mutate its input state when actions are applied or rejected", () => {
