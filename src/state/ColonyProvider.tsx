@@ -30,7 +30,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
 
   function assignDwarf(id: string, assignment: JobType) {
     const dwarf = colony.dwarves.find((d) => d.id === id);
-    if (dwarf?.status === "expedition") return; // Prevent assigning a job to a dwarf on an expedition
+    if (dwarf?.status === "expedition" || dwarf?.status === "resting") return;
 
     setColony((current) => assignJob(current, id, assignment));
   }
@@ -41,7 +41,12 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
 
   async function sendExpedition(dwarfId: string, destination: string) {
     const dwarf = colony.dwarves.find((d) => d.id === dwarfId);
-    if (dwarf?.status === "expedition" || inFlight.current.has(dwarfId)) return; // Prevent sending a dwarf on an expedition if they are already on one or if the expedition is in flight
+    if (
+      !dwarf ||
+      dwarf.status === "expedition" ||
+      inFlight.current.has(dwarfId)
+    )
+      return; // Prevent sending a dwarf on an expedition if they are already on one or if the expedition is in flight - optional chaining is not possible because dwarf not found -> undefined -> false
 
     inFlight.current.add(dwarfId);
     setColony((current) =>

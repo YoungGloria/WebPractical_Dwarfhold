@@ -1,6 +1,6 @@
 export type ResourceKey = "wood" | "stone" | "food" | "tools";
 export type JobType = "woodcutting" | "mining" | "farming" | null;
-export type DwarfStatus = "idle" | "working" | "expedition";
+export type DwarfStatus = "idle" | "working" | "expedition" | "resting";
 export interface Resources {
   wood: number;
   stone: number;
