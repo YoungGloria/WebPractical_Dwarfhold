@@ -56,8 +56,8 @@ export function Layout() {
       )}
 
       {restoreNotice && (
-  <Popup {...restoreNotice} onClose={dismissRestoreNotice} />
-)}
+        <Popup {...restoreNotice} onClose={dismissRestoreNotice} />
+      )}
 
       <ResourceBar resources={colony.resources} />
       <Outlet />

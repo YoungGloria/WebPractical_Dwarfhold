@@ -17,7 +17,7 @@ export const MAX_SAVES = 5;
 export const FORGE_SECONDS = 5;
 export const EXPEDITION_SECONDS = 5;
 
-// Single source of truth for allowed values. 
+// Single source of truth for allowed values.
 // New statuses/jobs/resources must be added here and in the matching parse function.
 const STATUSES = [
   "idle",
@@ -203,9 +203,7 @@ function parsePending(raw: unknown): Record<string, PendingExpedition> | null {
       return null;
     }
     const seconds =
-      typeof entry.seconds === "number"
-        ? entry.seconds
-        : EXPEDITION_SECONDS;
+      typeof entry.seconds === "number" ? entry.seconds : EXPEDITION_SECONDS;
     if (!isCount(seconds) || seconds < 1 || seconds > EXPEDITION_SECONDS) {
       return null;
     }

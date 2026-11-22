@@ -171,9 +171,7 @@ export function ColonyPage() {
 
           <button
             disabled={blocked}
-            onClick={() =>
-              sendExpedition(expeditionDwarf, destination)
-            } // onClick expects a function that returns void
+            onClick={() => sendExpedition(expeditionDwarf, destination)} // onClick expects a function that returns void
           >
             {expeditionPending ? "Beyond the gate…" : "Send expedition"}
           </button>

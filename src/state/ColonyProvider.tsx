@@ -22,7 +22,6 @@ import {
 import { ColonyContext, type ColonyContextValue } from "./ColonyContext";
 
 export function ColonyProvider({ children }: { children: ReactNode }) {
- 
   // Read the save exactly once (synchronous localStorage)
   const [boot] = useState(() => bootstrapColony());
 
@@ -30,7 +29,9 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   const [paused, setPaused] = useState(boot.paused);
   const [restoreNotice, setRestoreNotice] = useState(boot.notice);
   const [craftCountdowns, setCraftCountdowns] = useState(boot.craftCountdowns);
-  const [expeditionCountdowns, setExpeditionCountdowns] = useState(boot.expeditionCountdowns);
+  const [expeditionCountdowns, setExpeditionCountdowns] = useState(
+    boot.expeditionCountdowns,
+  );
 
   const inFlight = useRef(new Set<string>()); // Track dwarves currently on expeditions
   const craftTimers = useRef(new Map<string, number>());
@@ -38,13 +39,13 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   const pausedRef = useRef(paused);
   const pendingRequests = useRef(
     new Map<string, PendingExpedition>(Object.entries(boot.pendingExpeditions)),
-  )
+  );
 
   useEffect(() => {
     pausedRef.current = paused;
   }, [paused]);
 
-    const snapshot = () => ({
+  const snapshot = () => ({
     version: SAVE_VERSION,
     savedAt: Date.now(),
     colony,
@@ -74,7 +75,12 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       startCraftTimer(dwarfId, seconds),
     );
     Object.entries(boot.pendingExpeditions).forEach(([dwarfId, request]) => {
-      startExpeditionTimer(dwarfId, request.destination, request.requestId, request.seconds);
+      startExpeditionTimer(
+        dwarfId,
+        request.destination,
+        request.requestId,
+        request.seconds,
+      );
     });
   }, []);
 
@@ -153,9 +159,9 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       return;
 
     setColony((current) => craftToolAction(current, dwarfId));
-    setCraftCountdowns((current) => ({ 
+    setCraftCountdowns((current) => ({
       ...current,
-       [dwarfId]: FORGE_SECONDS,
+      [dwarfId]: FORGE_SECONDS,
     }));
     startCraftTimer(dwarfId, FORGE_SECONDS);
   }
@@ -253,12 +259,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
         ...current,
         [dwarfId]: seconds,
       }));
-      startExpeditionTimer(
-        dwarfId,
-        destination,
-        existingRequestId,
-        seconds,
-      );
+      startExpeditionTimer(dwarfId, destination, existingRequestId, seconds);
       return;
     }
 
@@ -286,15 +287,10 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       ...current,
       [dwarfId]: EXPEDITION_SECONDS,
     }));
-    startExpeditionTimer(
-      dwarfId,
-      destination,
-      requestId,
-      EXPEDITION_SECONDS,
-    );
+    startExpeditionTimer(dwarfId, destination, requestId, EXPEDITION_SECONDS);
   }
 
-function newGame() {
+  function newGame() {
     clearColonySave();
     window.location.reload(); // nothing is saved on unload, so the reset sticks
   }

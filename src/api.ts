@@ -62,12 +62,7 @@ export async function beginExpedition(
 ): Promise<ExpeditionResult> {
   for (let attempt = 0; ; attempt += 1) {
     try {
-      return await sendOnce(
-        dwarfId,
-        destination,
-        requestId,
-        timeoutMs,
-      );
+      return await sendOnce(dwarfId, destination, requestId, timeoutMs);
     } catch (error) {
       if (!(error instanceof RetryableError) || attempt >= retries) throw error;
       await sleep(500 * 2 ** attempt); // Exponential backoff: 500ms, 1000ms, etc.
