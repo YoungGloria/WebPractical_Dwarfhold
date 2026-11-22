@@ -1,4 +1,4 @@
-import type { ColonyState, JobType, Resources } from "./types";
+import type { ColonyState, Dwarf, JobType, Resources } from "./types";
 import {isFamine} from "./utils";
 
 export const production: Record<Exclude<JobType, null>, Partial<Resources>> = {
@@ -7,16 +7,32 @@ export const production: Record<Exclude<JobType, null>, Partial<Resources>> = {
   farming: { food: 4 },
 };
 
+export const isProducing = (dwarf: Dwarf) =>
+  dwarf.assignment !== null &&
+  dwarf.status !== "expedition" &&
+  dwarf.status !== "resting" &&
+  dwarf.status !== "forging";
+
 export function advanceDay(state: ColonyState): ColonyState {
   const resources = { ...state.resources };
-  let modifier: number = 0;
+  const dwarves = state.dwarves.map((dwarf) =>
+    dwarf.status === "resting"
+      ? {
+          ...dwarf,
+          status: dwarf.assignment ? ("working" as const) : ("idle" as const),
+        }
+      : dwarf,
+  );
 
-  state.dwarves.forEach((dwarf) => {
-    if (!dwarf.assignment || dwarf.status === "expedition") return; // Skip dwarves without an assignment or on an expedition
-    if(dwarf.wasOnExpedition) {
-        dwarf.wasOnExpedition = false;
-        return;
-    }
+    let modifier: number = 0;
+
+  dwarves.forEach((dwarf) => {
+    if (!dwarf.assignment || !isProducing(dwarf)) return; // Skip dwarves without an assignment or on an expedition
+
+      if(dwarf.wasOnExpedition) {
+          dwarf.wasOnExpedition = false;
+          return;
+      }
     const output = production[dwarf.assignment];
 
     if(isFamine(state)) {
@@ -30,7 +46,7 @@ export function advanceDay(state: ColonyState): ColonyState {
 
   resources.food = Math.max(0, resources.food - state.dwarves.length);
 
-  return { ...state, day: state.day + 1, resources };
+  return { ...state, day: state.day + 1, resources, dwarves };
 }
 
 export const jobLabel = (job: JobType) =>

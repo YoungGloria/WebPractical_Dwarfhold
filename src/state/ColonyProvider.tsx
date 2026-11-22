@@ -5,6 +5,7 @@ import { advanceDay } from "../simulation";
 import type { JobType } from "../types";
 import {
   assignJob,
+  completeCraftToolAction,
   completeExpeditionAction,
   craftToolAction,
   failExpeditionAction,
@@ -16,6 +17,23 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   const [colony, setColony] = useState(createInitialState);
   const [paused, setPaused] = useState(false);
   const inFlight = useRef(new Set<string>()); // Track dwarves currently on expeditions
+  const craftTimers = useRef(new Map<string, number>());
+  const pausedRef = useRef(paused);
+  const [craftCountdowns, setCraftCountdowns] = useState<
+    Record<string, number>
+  >({});
+
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
+
+  useEffect(
+    () => () => {
+      craftTimers.current.forEach((timer) => window.clearInterval(timer));
+      craftTimers.current.clear();
+    },
+    [],
+  );
 
   useEffect(() => {
     if (paused) return;
@@ -30,18 +48,65 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
 
   function assignDwarf(id: string, assignment: JobType) {
     const dwarf = colony.dwarves.find((d) => d.id === id);
-    if (dwarf?.status === "expedition") return; // Prevent assigning a job to a dwarf on an expedition
+    if (
+      dwarf?.status === "expedition" ||
+      dwarf?.status === "resting" ||
+      dwarf?.status === "forging"
+    )
+      return;
 
     setColony((current) => assignJob(current, id, assignment));
   }
 
-  function craftTool() {
-    setColony((current) => craftToolAction(current));
+  function craftTool(dwarfId: string) {
+    const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
+    if (
+      !dwarf?.specialty ||
+      (dwarf.status !== "working" && dwarf.status !== "idle")
+    )
+      return;
+    if (
+      colony.resources.wood < 3 ||
+      colony.resources.stone < 2 ||
+      craftTimers.current.has(dwarfId)
+    )
+      return;
+
+    setColony((current) => craftToolAction(current, dwarfId));
+    setCraftCountdowns((current) => ({ ...current, [dwarfId]: 5 }));
+
+    let remaining = 5;
+    const timer = window.setInterval(() => {
+      if (pausedRef.current) return;
+
+      remaining -= 1;
+      if (remaining <= 0) {
+        window.clearInterval(timer);
+        craftTimers.current.delete(dwarfId);
+        setCraftCountdowns((current) => {
+          const next = { ...current };
+          delete next[dwarfId];
+          return next;
+        });
+        setColony((current) => completeCraftToolAction(current, dwarfId));
+        return;
+      }
+      setCraftCountdowns((current) => ({
+        ...current,
+        [dwarfId]: remaining,
+      }));
+    }, 1_000);
+    craftTimers.current.set(dwarfId, timer);
   }
 
   async function sendExpedition(dwarfId: string, destination: string) {
     const dwarf = colony.dwarves.find((d) => d.id === dwarfId);
-    if (dwarf?.status === "expedition" || inFlight.current.has(dwarfId)) return; // Prevent sending a dwarf on an expedition if they are already on one or if the expedition is in flight
+    if (
+      !dwarf ||
+      dwarf.status === "expedition" ||
+      inFlight.current.has(dwarfId)
+    )
+      return; // Prevent sending a dwarf on an expedition if they are already on one or if the expedition is in flight - optional chaining is not possible because dwarf not found -> undefined -> false
 
     inFlight.current.add(dwarfId);
     setColony((current) =>
@@ -84,6 +149,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     paused,
     activities: colony.log,
     expeditionPending,
+    craftCountdowns,
     togglePaused: () => setPaused((value) => !value),
     assignDwarf,
     craftTool,

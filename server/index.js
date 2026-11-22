@@ -46,6 +46,13 @@ app.post("/api/expeditions", async (req, res) => {
 
   if (hasRequestId && processed.has(requestId)) {
     const entry = processed.get(requestId);
+
+    // Validate that the cached entry corresponds to the same dwarfId and destination
+    if (entry.dwarfId !== dwarfId || entry.destination !== destination) {
+      return res
+        .status(409)
+        .json({ error: "requestId belongs to another expedition" });
+    }
     try {
       const body = await entry.promise;
       return res.json(body);
@@ -101,7 +108,8 @@ app.post("/api/expeditions", async (req, res) => {
 
   const promise = runExpedition();
   if (hasRequestId) {
-    processed.set(requestId, { promise });
+    processed.set(requestId, { promise, dwarfId, destination });
+    setTimeout(() => processed.delete(requestId), 10 * 60_000).unref(); // Clean up the cache after 10 minutes, unref so it doesn't keep the server alive
   }
 
   try {
