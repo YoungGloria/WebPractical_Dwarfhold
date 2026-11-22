@@ -65,7 +65,15 @@ function makeDwarf(
   assignment: JobType = "mining",
   status: DwarfStatus = "working",
 ): Dwarf {
-  return { id, name: `Dwarf ${id}`, title: "", icon: "", assignment, status };
+  return {
+    id,
+    name: `Dwarf ${id}`,
+    title: "",
+    icon: "",
+    assignment,
+    status,
+    hasTool: false,
+  };
 }
 
 function makeState(dwarves: Dwarf[] = [makeDwarf("dwarf-1")]): ColonyState {

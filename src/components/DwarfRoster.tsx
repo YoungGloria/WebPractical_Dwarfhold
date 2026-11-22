@@ -1,14 +1,16 @@
 import { jobLabel } from "../simulation";
-import type { Dwarf, JobType } from "../types";
+import type { ColonyState, Dwarf, JobType } from "../types";
 
 const jobs: Exclude<JobType, null>[] = ["woodcutting", "mining", "farming"];
 
 interface Props {
   dwarves: Dwarf[];
   onAssign: (id: string, job: JobType) => void;
+  state: ColonyState;
+  onToggleTool: (dwarf: Dwarf) => void;
 }
 
-export function DwarfRoster({ dwarves, onAssign }: Props) {
+export function DwarfRoster({ dwarves, onAssign, state, onToggleTool }: Props) {
   const presentDwarves = dwarves.filter(
     (dwarf) => dwarf.status !== "expedition",
   ).length;
@@ -48,6 +50,17 @@ export function DwarfRoster({ dwarves, onAssign }: Props) {
                 <p>
                   {dwarf.title} · {specialty}
                 </p>
+
+                <label>
+                  Has Tool:{" "}
+                  <input
+                    type="checkbox"
+                    name="toolCheckbox"
+                    checked={dwarf.hasTool}
+                    disabled={!dwarf.hasTool && state.resources.tools <= 0}
+                    onChange={() => onToggleTool(dwarf)}
+                  />
+                </label>
 
                 <select
                   value={dwarf.assignment ?? ""}

@@ -16,6 +16,7 @@ function makeDwarf(
     assignment: "mining",
     status,
     specialty,
+    hasTool: false,
   };
 }
 

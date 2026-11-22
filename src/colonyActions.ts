@@ -206,3 +206,25 @@ export function failExpeditionAction(
 
   return log({ ...state, dwarves }, errorMessage, "warning");
 }
+
+export function toggleToolAction(
+  state: ColonyState,
+  dwarfId: string,
+  toolEquipped: boolean,
+  message: string,
+): ColonyState {
+  const newState = {
+    ...state,
+    resources: {
+      ...state.resources,
+      tools: toolEquipped
+        ? state.resources.tools + 1
+        : state.resources.tools - 1,
+    },
+    dwarves: state.dwarves.map((dwarf) =>
+      dwarf.id === dwarfId ? { ...dwarf, hasTool: !toolEquipped } : dwarf,
+    ),
+  };
+
+  return log(newState, message);
+}

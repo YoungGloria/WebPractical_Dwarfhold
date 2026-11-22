@@ -15,6 +15,7 @@ export interface ColonyContextValue {
   craftTool: (dwarfId: string) => void;
   craftWeapon: (dwarfId: string) => void;
   sendExpedition: (dwarfId: string, destination: string) => Promise<void>;
+  toggleTool: (dwarf: Dwarf) => void;
 }
 
 export const ColonyContext = createContext<ColonyContextValue | null>(null);

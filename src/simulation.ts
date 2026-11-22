@@ -16,10 +16,10 @@ export const isProducing = (dwarf: Dwarf) =>
 
 export function advanceDay(state: ColonyState): ColonyState {
   const resources = { ...state.resources };
-  let modifier = 0;
+  let famineModefier = 0;
 
   if (isFamine(state)) {
-    modifier -= 1;
+    famineModefier -= 1;
     state = log(
       state,
       "There is a Famine in your colony. The productivity of your dwarves was reduced.",
@@ -32,7 +32,9 @@ export function advanceDay(state: ColonyState): ColonyState {
 
     const output = production[dwarf.assignment];
     Object.entries(output).forEach(([resource, amount]) => {
-      resources[resource as keyof Resources] += amount ? amount + modifier : 0;
+      amount = amount ? amount + famineModefier : 0;
+      if (dwarf.hasTool) amount += 1;
+      resources[resource as keyof Resources] += amount;
     });
   });
 

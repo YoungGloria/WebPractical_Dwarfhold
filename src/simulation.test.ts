@@ -14,6 +14,7 @@ describe("colony simulation", () => {
           icon: "",
           assignment: "woodcutting",
           status: "working",
+          hasTool: false,
         },
       ],
       log: [],

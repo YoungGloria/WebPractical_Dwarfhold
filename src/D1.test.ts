@@ -59,6 +59,7 @@ function makeDwarf(
     icon: "",
     assignment,
     status,
+    hasTool: false,
   };
 }
 

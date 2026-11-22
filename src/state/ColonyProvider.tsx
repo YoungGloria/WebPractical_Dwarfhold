@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { beginExpedition } from "../api";
 import { createInitialState } from "../initialState";
 import { advanceDay, DayPhase, getDayPhase } from "../simulation";
-import type { JobType } from "../types";
+import type { JobType, Dwarf } from "../types";
 import {
   assignJob,
   completeCraftToolAction,
@@ -12,6 +12,7 @@ import {
   craftWeaponAction,
   failExpeditionAction,
   startExpeditionAction,
+  toggleToolAction,
 } from "../colonyActions";
 import { ColonyContext, type ColonyContextValue } from "./ColonyContext";
 
@@ -81,6 +82,19 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       return;
 
     setColony((current) => assignJob(current, id, assignment));
+  }
+
+  function toggleTool(dwarf: Dwarf) {
+    setColony((current) =>
+      toggleToolAction(
+        current,
+        dwarf.id,
+        dwarf.hasTool,
+        dwarf.hasTool
+          ? `${dwarf.name} put the tool back into storage.`
+          : `${dwarf.name} equipped a tool.`,
+      ),
+    );
   }
 
   function craftTool(dwarfId: string) {
@@ -223,6 +237,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     craftTool,
     craftWeapon,
     sendExpedition,
+    toggleTool,
   };
 
   return <ColonyContext value={value}>{children}</ColonyContext>;

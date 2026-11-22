@@ -7,8 +7,14 @@ import type { ResourceKey } from "../types";
 import { isFamine } from "../utils";
 
 export function ColonyPage() {
-  const { colony, activities, expeditionPending, assignDwarf, sendExpedition } =
-    useColony();
+  const {
+    colony,
+    activities,
+    expeditionPending,
+    assignDwarf,
+    sendExpedition,
+    toggleTool,
+  } = useColony();
   const [destination, setDestination] = useState("crystal-cave");
   const [expeditionDwarf, setExpeditionDwarf] = useState(
     () => colony.dwarves.find((d) => d.status !== "expedition")?.id ?? "", // Default to the first available dwarf
@@ -52,7 +58,7 @@ export function ColonyPage() {
     (total, dwarf) => {
       if (dwarf.assignment && isProducing(dwarf)) {
         let resourceModifier = 0;
-        if (isFamine(useColony().colony)) {
+        if (isFamine(colony)) {
           resourceModifier -= 1;
         }
         // ensure the dwarf has an assignment and is producing (ie not on an expedition)
@@ -75,7 +81,12 @@ export function ColonyPage() {
 
   return (
     <div className="dashboard">
-      <DwarfRoster dwarves={colony.dwarves} onAssign={assignDwarf} />
+      <DwarfRoster
+        dwarves={colony.dwarves}
+        onAssign={assignDwarf}
+        state={colony}
+        onToggleTool={toggleTool}
+      />
 
       <section className="center-stack">
         <section className="panel production">
