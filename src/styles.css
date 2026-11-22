@@ -423,3 +423,15 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  width: 30%;
+  z-index: 10;
+}

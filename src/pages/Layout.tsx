@@ -1,53 +1,59 @@
-import { NavLink, Outlet } from "react-router";
-import { ResourceBar } from "../components/ResourceBar";
-import { useColony } from "../state/ColonyContext";
+import {NavLink, Outlet} from "react-router";
+import {ResourceBar} from "../components/ResourceBar";
+import {useColony} from "../state/ColonyContext";
+import {Popup} from "../components/Popup";
+import {isFamine} from "../utils";
 
 export function Layout() {
-  const { colony, paused, togglePaused } = useColony();
+    const {colony, paused, togglePaused} = useColony();
 
-  return (
-    <main>
-      <header className="masthead">
-        <div className="brand">
-          <b>⛏</b>
-          <div>
-            <small>THE DEEP REALMS OF</small>
-            <h1>
-              Dwarf<span>hold</span>
-            </h1>
-          </div>
-        </div>
+    return (
+        <main>
+            <header className="masthead">
+                <div className="brand">
+                    <b>⛏</b>
+                    <div>
+                        <small>THE DEEP REALMS OF</small>
+                        <h1>
+                            Dwarf<span>hold</span>
+                        </h1>
+                    </div>
+                </div>
 
-        <div className="hold-title">
-          <small>COLONY</small>
-          <strong>STONEHOME</strong>
-          <span>Founded beneath Emberpeak</span>
-        </div>
+                <div className="hold-title">
+                    <small>COLONY</small>
+                    <strong>STONEHOME</strong>
+                    <span>Founded beneath Emberpeak</span>
+                </div>
 
-        <div className="day">
-          <small>DEEP DAY</small>
-          <strong>{colony.day}</strong>
-          <button onClick={togglePaused}>
-            {paused ? "Wake the hold" : "Pause"}
-          </button>
-        </div>
-      </header>
+                <div className="day">
+                    <small>DEEP DAY</small>
+                    <strong>{colony.day}</strong>
+                    <button onClick={togglePaused}>
+                        {paused ? "Wake the hold" : "Pause"}
+                    </button>
+                </div>
+            </header>
 
-      <nav className="main-nav" aria-label="Colony navigation">
-        <NavLink to="/" end>
-          Colony
-        </NavLink>
-        <NavLink to="/forge">Forge</NavLink>
-      </nav>
+            <nav className="main-nav" aria-label="Colony navigation">
+                <NavLink to="/" end>
+                    Colony
+                </NavLink>
+                <NavLink to="/forge">Forge</NavLink>
+            </nav>
 
-      <ResourceBar resources={colony.resources} />
-      <Outlet />
+            {isFamine(useColony().colony) ?
+                <Popup header="Famine" subHeader="It has been a long time since they have eaten." message={"Your people are starving. Feed them.\nYour workers output is cut in half."}/> : ""
+            }
 
-      <footer>
-        <span>🔥 Forge: burning</span>
-        <span>Next deep day in ~8 seconds</span>
-        <span>{paused ? "The hold is resting" : "⚙ Simulation active"}</span>
-      </footer>
-    </main>
-  );
+            <ResourceBar resources={colony.resources}/>
+            <Outlet/>
+
+            <footer>
+                <span>🔥 Forge: burning</span>
+                <span>Next deep day in ~8 seconds</span>
+                <span>{paused ? "The hold is resting" : "⚙ Simulation active"}</span>
+            </footer>
+        </main>
+    );
 }
