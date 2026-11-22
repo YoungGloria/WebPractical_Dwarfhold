@@ -1,5 +1,6 @@
 import type { ColonyState, Dwarf, JobType, Resources } from "./types";
 import { isFamine } from "./utils";
+import { log } from "./stateUtils";
 
 export const production: Record<Exclude<JobType, null>, Partial<Resources>> = {
   woodcutting: { wood: 3 },
@@ -15,7 +16,16 @@ export const isProducing = (dwarf: Dwarf) =>
 
 export function advanceDay(state: ColonyState): ColonyState {
   const resources = { ...state.resources };
-  const modifier = isFamine(state) ? -1 : 0;
+  let modifier = 0;
+
+  if (isFamine(state)) {
+    modifier -= 1;
+    state = log(
+      state,
+      "There is a Famine in your colony. The productivity of your dwarves was reduced.",
+      "warning",
+    );
+  }
 
   state.dwarves.forEach((dwarf) => {
     if (!dwarf.assignment || !isProducing(dwarf)) return;
