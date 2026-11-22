@@ -1,4 +1,4 @@
-type PopupProps = {
+interface PopupProps {
     header: string,
     subHeader: string,
     message: string

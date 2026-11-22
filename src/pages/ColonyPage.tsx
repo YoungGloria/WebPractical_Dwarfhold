@@ -51,7 +51,7 @@ export function ColonyPage() {
   const dailyOutput = colony.dwarves.reduce<Record<ResourceKey, number>>(
     (total, dwarf) => {
       if (dwarf.assignment && isProducing(dwarf)) {
-        let resourceModifier: number = 0;
+        let resourceModifier = 0;
         if(isFamine(useColony().colony)) { resourceModifier -= 1; }
         // ensure the dwarf has an assignment and is producing (ie not on an expedition)
         const output = production[dwarf.assignment];
