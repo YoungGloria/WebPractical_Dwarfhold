@@ -1,9 +1,12 @@
 import { createContext, useContext } from "react";
 import type { Activity, ColonyState, JobType } from "../types";
+import { DayPhase } from "../simulation";
 
 export interface ColonyContextValue {
   colony: ColonyState;
   paused: boolean;
+  dayPhase: DayPhase;
+  daySecondsLeft: number;
   activities: Activity[];
   expeditionPending: boolean;
   craftCountdowns: Record<string, number>;

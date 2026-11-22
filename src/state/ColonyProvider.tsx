@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { beginExpedition } from "../api";
 import { createInitialState } from "../initialState";
-import { advanceDay } from "../simulation";
+import { advanceDay, DayPhase, getDayPhase } from "../simulation";
 import type { JobType } from "../types";
 import {
   assignJob,
@@ -35,13 +35,36 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  // Track elapsed time for day phase updates
+
+  const TICK_MS = 200; // Update every 200ms
+  const DAY_MS = 8_000; // Total duration of a day in milliseconds (8 seconds)
+
+  const elapsedMs = useRef(0);
+  const [dayPhase, setDayPhase] = useState<DayPhase>("early_morning");
+  const [daySecondsLeft, setDaySecondsLeft] = useState(8);
+
   useEffect(() => {
     if (paused) return;
 
-    const timer = window.setInterval(
-      () => setColony((current) => advanceDay(current)),
-      8_000,
-    );
+    const timer = window.setInterval(() => {
+      elapsedMs.current += TICK_MS;
+
+      // Advance the day if a full day has passed
+      if (elapsedMs.current >= DAY_MS) {
+        elapsedMs.current %= DAY_MS;
+        setColony((current) => advanceDay(current));
+      }
+
+      // Get the current day phase based on elapsed time and update state if it has changed
+      const newPhase = getDayPhase(elapsedMs.current);
+      setDayPhase((prev) => (prev === newPhase ? prev : newPhase));
+      // Update the countdown for the next deep day
+      const nextSecondsLeft = Math.ceil((DAY_MS - elapsedMs.current) / 1_000); // Display only full seconds: .ceil returns smallest integer greater than or equal to the given number
+      setDaySecondsLeft((prev) =>
+        prev === nextSecondsLeft ? prev : nextSecondsLeft,
+      );
+    }, TICK_MS);
 
     return () => window.clearInterval(timer);
   }, [paused]);
@@ -150,6 +173,8 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     activities: colony.log,
     expeditionPending,
     craftCountdowns,
+    dayPhase,
+    daySecondsLeft,
     togglePaused: () => setPaused((value) => !value),
     assignDwarf,
     craftTool,

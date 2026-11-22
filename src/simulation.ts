@@ -48,3 +48,33 @@ export const jobLabel = (job: JobType) =>
         farming: "Mushroom Farm",
       }[job]
     : "Unassigned";
+
+// Helper functions to display dynamic daytime statements
+export type DayPhase = "early_morning" | "lunchtime" | "deep_day" | "evening";
+
+export function getDayPhase(elapsedMs: number): DayPhase {
+  const clamped = Math.max(0, Math.min(elapsedMs, 7_999));
+  const index = Math.floor(clamped / 2_000); // day (8s) divided into 4 phases (2s each)
+
+  const phases: DayPhase[] = [
+    "early_morning",
+    "lunchtime",
+    "deep_day",
+    "evening",
+  ];
+
+  return phases[index];
+}
+
+export function dayPhaseLabel(phase: DayPhase): string {
+  switch (phase) {
+    case "early_morning":
+      return "EARLY MORNING";
+    case "lunchtime":
+      return "LUNCHTIME";
+    case "deep_day":
+      return "DEEP DAY";
+    case "evening":
+      return "EVENING";
+  }
+}
