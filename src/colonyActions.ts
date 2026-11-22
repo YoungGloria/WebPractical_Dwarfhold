@@ -89,6 +89,63 @@ export function completeCraftToolAction(
   );
 }
 
+export function craftWeaponAction(
+  state: ColonyState,
+  dwarfId: string,
+): ColonyState {
+  const dwarf = state.dwarves.find((d) => d.id === dwarfId);
+  if (
+    !dwarf?.specialty ||
+    dwarf.status === "expedition" ||
+    dwarf.status === "resting" ||
+    dwarf.status === "forging"
+  )
+    return state;
+
+  if (state.resources.wood < 4 || state.resources.stone < 3) {
+    return state;
+  }
+
+  return log(
+    {
+      ...state,
+      resources: {
+        ...state.resources,
+        wood: state.resources.wood - 4,
+        stone: state.resources.stone - 3,
+      },
+      dwarves: state.dwarves.map((d) =>
+        d.id === dwarfId ? { ...d, status: "forging" as const } : d,
+      ),
+    },
+    `${dwarf.name} started forging a beautiful weapon.`,
+    "good",
+  );
+}
+
+export function completeCraftWeaponAction(
+  state: ColonyState,
+  dwarfId: string,
+): ColonyState {
+  const dwarf = state.dwarves.find((d) => d.id === dwarfId);
+  if (dwarf?.status !== "forging") return state;
+
+  return log(
+    {
+      ...state,
+      resources: {
+        ...state.resources,
+        weapons: state.resources.weapons + 1,
+      },
+      dwarves: state.dwarves.map((d) =>
+        d.id === dwarfId ? { ...d, status: "resting" as const } : d,
+      ),
+    },
+    `${dwarf.name} completed the Weapon and is resting until tomorrow.`,
+    "good",
+  );
+}
+
 /* 
 D4 functions for expeditions. May be moved to simulations.ts or seperate file later on
 */

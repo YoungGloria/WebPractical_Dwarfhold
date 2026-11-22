@@ -71,7 +71,7 @@ function makeDwarf(
 function makeState(dwarves: Dwarf[] = [makeDwarf("dwarf-1")]): ColonyState {
   return {
     day: 12,
-    resources: { wood: 14, stone: 9, food: 18, tools: 1 },
+    resources: { wood: 14, stone: 9, food: 18, tools: 1, weapons: 0 },
     dwarves,
     log: [],
     logSeq: 0,

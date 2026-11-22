@@ -8,6 +8,7 @@ export function createInitialState(): ColonyState {
       stone: 9,
       food: 18,
       tools: 1,
+      weapons: 0,
     },
     dwarves: [
       {

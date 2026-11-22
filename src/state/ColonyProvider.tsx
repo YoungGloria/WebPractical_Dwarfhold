@@ -6,8 +6,10 @@ import type { JobType } from "../types";
 import {
   assignJob,
   completeCraftToolAction,
+  completeCraftWeaponAction,
   completeExpeditionAction,
   craftToolAction,
+  craftWeaponAction,
   failExpeditionAction,
   startExpeditionAction,
 } from "../colonyActions";
@@ -122,6 +124,47 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     craftTimers.current.set(dwarfId, timer);
   }
 
+  function craftWeapon(dwarfId: string) {
+    const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
+    if (
+      !dwarf?.specialty ||
+      (dwarf.status !== "working" && dwarf.status !== "idle")
+    )
+      return;
+    if (
+      colony.resources.wood < 4 ||
+      colony.resources.stone < 3 ||
+      craftTimers.current.has(dwarfId)
+    )
+      return;
+
+    setColony((current) => craftWeaponAction(current, dwarfId));
+    setCraftCountdowns((current) => ({ ...current, [dwarfId]: 5 }));
+
+    let remaining = 5;
+    const timer = window.setInterval(() => {
+      if (pausedRef.current) return;
+
+      remaining -= 1;
+      if (remaining <= 0) {
+        window.clearInterval(timer);
+        craftTimers.current.delete(dwarfId);
+        setCraftCountdowns((current) => {
+          const next = { ...current };
+          delete next[dwarfId];
+          return next;
+        });
+        setColony((current) => completeCraftWeaponAction(current, dwarfId));
+        return;
+      }
+      setCraftCountdowns((current) => ({
+        ...current,
+        [dwarfId]: remaining,
+      }));
+    }, 1_000);
+    craftTimers.current.set(dwarfId, timer);
+  }
+
   async function sendExpedition(dwarfId: string, destination: string) {
     const dwarf = colony.dwarves.find((d) => d.id === dwarfId);
     if (
@@ -178,6 +221,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     togglePaused: () => setPaused((value) => !value),
     assignDwarf,
     craftTool,
+    craftWeapon,
     sendExpedition,
   };
 

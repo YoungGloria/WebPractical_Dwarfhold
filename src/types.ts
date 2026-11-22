@@ -7,6 +7,7 @@ export interface Resources {
   stone: number;
   food: number;
   tools: number;
+  weapons: number;
 }
 
 export interface Dwarf {
@@ -39,4 +40,12 @@ export interface Activity {
   day: number;
   message: string;
   tone?: "good" | "warning";
+}
+
+export interface Recepies {
+  wood: number;
+  stone: number;
+  output: number;
+  //type: "tool" | "weapon"
+  icon: "⚒️" | "⚔️";
 }
