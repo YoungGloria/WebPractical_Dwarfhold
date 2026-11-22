@@ -4,6 +4,7 @@ import { DwarfRoster } from "../components/DwarfRoster";
 import { jobLabel, production, isProducing } from "../simulation";
 import { useColony } from "../state/ColonyContext";
 import type { ResourceKey } from "../types";
+import { isFamine } from "../utils";
 
 export function ColonyPage() {
   const { colony, activities, expeditionPending, assignDwarf, sendExpedition } =
@@ -21,10 +22,14 @@ export function ColonyPage() {
     if (
       !current ||
       current.status === "expedition" ||
-      current.status === "resting"
+      current.status === "resting" ||
+      current.status === "forging"
     ) {
       const next = colony.dwarves.find(
-        (dwarf) => dwarf.status !== "expedition" && dwarf.status !== "resting",
+        (dwarf) =>
+          dwarf.status !== "expedition" &&
+          dwarf.status !== "resting" &&
+          dwarf.status !== "forging",
       );
       if (next) {
         setExpeditionDwarf(next.id);
@@ -37,6 +42,7 @@ export function ColonyPage() {
     !selected ||
     selected.status === "expedition" ||
     selected.status === "resting" ||
+    selected.status === "forging" ||
     expeditionPending;
   const awayDwarf = colony.dwarves.find(
     (dwarf) => dwarf.status === "expedition",
@@ -45,10 +51,16 @@ export function ColonyPage() {
   const dailyOutput = colony.dwarves.reduce<Record<ResourceKey, number>>(
     (total, dwarf) => {
       if (dwarf.assignment && isProducing(dwarf)) {
+        let resourceModifier = 0;
+        if (isFamine(useColony().colony)) {
+          resourceModifier -= 1;
+        }
         // ensure the dwarf has an assignment and is producing (ie not on an expedition)
         const output = production[dwarf.assignment];
         Object.entries(output).forEach(([resource, amount]) => {
-          total[resource as ResourceKey] += amount ?? 0;
+          total[resource as ResourceKey] += amount
+            ? amount + resourceModifier
+            : 0;
         });
       }
       return total;
@@ -127,7 +139,9 @@ export function ColonyPage() {
               {colony.dwarves
                 .filter(
                   (dwarf) =>
-                    dwarf.status !== "expedition" && dwarf.status !== "resting",
+                    dwarf.status !== "expedition" &&
+                    dwarf.status !== "resting" &&
+                    dwarf.status !== "forging",
                 )
                 .map((dwarf) => (
                   <option key={dwarf.id} value={dwarf.id}>

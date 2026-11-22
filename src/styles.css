@@ -287,6 +287,26 @@ small {
   color: #927b60;
   margin: 0;
 }
+.forge-controls {
+  display: grid;
+  gap: 8px;
+  min-width: 360px;
+}
+.forge-controls label {
+  display: grid;
+  gap: 4px;
+  font: 600 10px Barlow Condensed;
+  color: #9e8566;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.forge-controls select {
+  width: 100%;
+  background: #100e0b;
+  color: #d8c8ae;
+  border: 1px solid #4d3f30;
+  padding: 6px;
+}
 .recipe {
   display: flex;
   align-items: center;
@@ -334,6 +354,16 @@ small {
 }
 .expedition button:disabled {
   opacity: 0.5;
+}
+.forge button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.craft-progress {
+  margin: 0;
+  color: #d9a34f;
+  font: 600 11px Barlow Condensed;
+  letter-spacing: 0.04em;
 }
 .expedition > p {
   font: 11px Barlow Condensed;
@@ -422,4 +452,16 @@ footer {
   .forge-layout {
     grid-template-columns: 1fr;
   }
+}
+
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  width: 30%;
+  z-index: 10;
 }

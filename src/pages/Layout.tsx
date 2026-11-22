@@ -1,6 +1,8 @@
 import { NavLink, Outlet } from "react-router";
 import { ResourceBar } from "../components/ResourceBar";
 import { useColony } from "../state/ColonyContext";
+import { Popup } from "../components/Popup";
+import { isFamine } from "../utils";
 
 export function Layout() {
   const { colony, paused, togglePaused } = useColony();
@@ -39,6 +41,18 @@ export function Layout() {
         </NavLink>
         <NavLink to="/forge">Forge</NavLink>
       </nav>
+
+      {isFamine(useColony().colony) ? (
+        <Popup
+          header="Famine"
+          subHeader="It has been a long time since they have eaten."
+          message={
+            "Your people are starving. Feed them.\nYour workers output is cut in half."
+          }
+        />
+      ) : (
+        ""
+      )}
 
       <ResourceBar resources={colony.resources} />
       <Outlet />
