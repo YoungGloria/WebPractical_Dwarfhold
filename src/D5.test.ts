@@ -230,7 +230,7 @@ describe("D5 persistence", () => {
     expect(boot.pendingExpeditions).toEqual({});
   });
 
-  it("does not crash when storage throws", () => {
+  it("does not crash when storage throws error", () => {
     const broken: StorageLike = {
       getItem: () => {
         throw new Error("denied");
@@ -252,5 +252,76 @@ describe("D5 persistence", () => {
     saveSnapshot(snapshotOf(onDay(1)), storage);
     clearColonySave(storage);
     expect(loadSnapshot(storage)).toEqual({ status: "empty" });
+  });
+
+  // Note that this test is indicative of successful/failed restoration in general.
+  // Any validation error will result in failure to restore
+  it("preserves a populated colony state, dayElapsedMs, forging, and active expedition across save and bootstrap", () => {
+    const storage = fakeStorage();
+    const base = createInitialState();
+    const firstId = base.dwarves[0].id;
+    const secondId = base.dwarves[1]?.id;
+
+    const populated: ColonyState = {
+      ...base,
+      day: 7,
+      resources: { wood: 14, stone: 9, food: 18, tools: 2 },
+      dwarves: base.dwarves.map((d, index) => {
+        if (index === 0) {
+          return {
+            ...d,
+            status: "forging",
+            assignment: "mining",
+            specialty: "mining",
+          };
+        }
+        if (index === 1) {
+          return {
+            ...d,
+            status: "expedition",
+            assignment: null,
+            specialty: "farming",
+          };
+        }
+        return { ...d, assignment: "farming", specialty: "farming" };
+      }),
+      log: [
+        { id: "l-2", day: 7, message: "Second entry", tone: "good" },
+        { id: "l-1", day: 6, message: "First entry", tone: "warning" },
+      ],
+      logSeq: 2,
+    };
+
+    const pendingExpeditions = secondId
+      ? {
+          [secondId]: {
+            destination: "deep-caverns",
+            requestId: "req-42",
+            seconds: 3,
+          },
+        }
+      : {};
+
+    saveSnapshot(
+      snapshotOf(populated, {
+        dayElapsedMs: 3_000,
+        craftCountdowns: { [firstId]: 4 },
+        pendingExpeditions,
+      }),
+      storage,
+    );
+
+    const boot = bootstrapColony(storage);
+    expect(boot.dayElapsedMs).toBe(3_000);
+    expect(boot.craftCountdowns).toEqual({ [firstId]: 4 });
+    expect(boot.pendingExpeditions).toEqual(pendingExpeditions);
+    if (secondId) {
+      expect(boot.expeditionCountdowns).toEqual({ [secondId]: 3 });
+    }
+    expect(boot.colony.day).toBe(7);
+    expect(boot.colony.resources).toEqual(populated.resources);
+    expect(boot.colony.dwarves).toEqual(populated.dwarves);
+    expect(boot.colony.logSeq).toBe(5); // logSeq is incremented on restore
+    expect(boot.colony.log).toEqual(expect.arrayContaining(populated.log));
   });
 });

@@ -235,11 +235,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
         void runExpedition(dwarfId, destination, requestId);
         return;
       }
-
-      setExpeditionCountdowns((current) => ({
-        ...current,
-        [dwarfId]: remaining,
-      }));
+      // Pending is updated before the countdown to ensure that the most current info is included in the snapshot
       const pending = pendingRequests.current.get(dwarfId);
       if (pending) {
         pendingRequests.current.set(dwarfId, {
@@ -247,6 +243,10 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
           seconds: remaining,
         });
       }
+      setExpeditionCountdowns((current) => ({
+        ...current,
+        [dwarfId]: remaining,
+      }));
     }, 1_000);
     expeditionTimers.current.set(dwarfId, timer);
   }
@@ -287,27 +287,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  function sendExpedition(
-    dwarfId: string,
-    destination: string,
-    existingRequestId?: string,
-  ) {
-    if (existingRequestId) {
-      const existingPending = pendingRequests.current.get(dwarfId);
-      const seconds = existingPending?.seconds ?? EXPEDITION_SECONDS;
-      pendingRequests.current.set(dwarfId, {
-        destination,
-        requestId: existingRequestId,
-        seconds,
-      });
-      setExpeditionCountdowns((current) => ({
-        ...current,
-        [dwarfId]: seconds,
-      }));
-      startExpeditionTimer(dwarfId, destination, existingRequestId, seconds);
-      return;
-    }
-
+  function sendExpedition(dwarfId: string, destination: string) {
     const dwarf = colony.dwarves.find((d) => d.id === dwarfId);
     if (
       !dwarf ||
@@ -356,7 +336,6 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     restoreNotice,
     dismissRestoreNotice: () => setRestoreNotice(null),
     newGame,
-    setRestoreNotice,
     togglePaused: () => setPaused((value) => !value),
     assignDwarf,
     craftTool,

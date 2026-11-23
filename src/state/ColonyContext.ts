@@ -14,16 +14,11 @@ export interface ColonyContextValue {
   expeditionCountdowns: Record<string, number>;
   restoreNotice: RestoreNotice | null;
   dismissRestoreNotice: () => void;
-  newGame: () => void;
-  setRestoreNotice: (notice: RestoreNotice | null) => void;
+  newGame: () => void; // currently not used, but may be used for implementing a "New Game" button in the future
   togglePaused: () => void;
   assignDwarf: (id: string, assignment: JobType) => void;
   craftTool: (dwarfId: string) => void;
-  sendExpedition: (
-    dwarfId: string,
-    destination: string,
-    existingRequestId?: string,
-  ) => void;
+  sendExpedition: (dwarfId: string, destination: string) => void;
 }
 
 export const ColonyContext = createContext<ColonyContextValue | null>(null);

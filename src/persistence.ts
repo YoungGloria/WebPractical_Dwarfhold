@@ -451,7 +451,10 @@ export function bootstrapColony(
     );
   }
   for (const id of Object.keys(snapshot.pendingExpeditions)) {
-    colony = log(colony, `${nameOf(id)}'s expedition is being retried.`);
+    colony = log(
+      colony,
+      `${nameOf(id)}'s expedition continues once the hold is awake.`,
+    );
   }
 
   return {
