@@ -5,8 +5,9 @@ import { log } from "./stateUtils";
 // Constants for simulation
 // TODO: link all related input to these constants
 export const DAY_MS = 8_000;
-export const FORGE_SECONDS = 5;
+export const FORGE_TOOL_SECONDS = 5;
 export const EXPEDITION_SECONDS = 5;
+export const FORGE_WEAPON_SECONDS = 7;
 
 export const production: Record<Exclude<JobType, null>, Partial<Resources>> = {
   woodcutting: { wood: 3 },
@@ -18,7 +19,8 @@ export const isProducing = (dwarf: Dwarf) =>
   dwarf.assignment !== null &&
   dwarf.status !== "expedition" &&
   dwarf.status !== "resting" &&
-  dwarf.status !== "forging";
+  dwarf.status !== "forging_Tool" &&
+  dwarf.status !== "forging_Weapon";
 
 export function advanceDay(state: ColonyState): ColonyState {
   const resources = { ...state.resources };

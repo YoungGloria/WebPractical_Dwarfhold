@@ -9,7 +9,7 @@ import type {
   JobType,
   Resources,
 } from "./types";
-import { DAY_MS, EXPEDITION_SECONDS, FORGE_SECONDS } from "./simulation";
+import { DAY_MS, EXPEDITION_SECONDS, FORGE_TOOL_SECONDS, FORGE_WEAPON_SECONDS } from "./simulation";
 
 export const SAVE_KEY = "dwarfhold.saves";
 export const SAVE_VERSION = 1;
@@ -23,7 +23,7 @@ const STATUSES = [
   "expedition",
   "resting",
   "forging_Tool",
-    "forging_Weapon",
+  "forging_Weapon",
 ] as const satisfies readonly DwarfStatus[];
 const JOBS = [
   "woodcutting",
@@ -111,7 +111,7 @@ function parseResources(raw: unknown): Resources | null {
 
 function parseDwarf(raw: unknown): Dwarf | null {
   if (!isRecord(raw)) return null;
-  const { id, name, title, icon, assignment, status, specialty, hasTool } = raw;
+  const { id, name, title, icon, assignment, status, specialty, hasTool, countdown } = raw;
 
   if (
     typeof id !== "string" ||
@@ -122,6 +122,7 @@ function parseDwarf(raw: unknown): Dwarf | null {
   ) {
     return null;
   }
+  if (countdown !== undefined && !isCount(countdown)) return null;
   if (!isOneOf(STATUSES, status)) return null;
   if (assignment !== null && !isOneOf(JOBS, assignment)) return null;
   if (specialty !== undefined && !isOneOf(JOBS, specialty)) return null;
@@ -135,6 +136,7 @@ function parseDwarf(raw: unknown): Dwarf | null {
     assignment,
     status,
     ...(specialty === undefined ? {} : { specialty }),
+    ...(countdown === undefined ? {} : { countdown }),
   };
 }
 
@@ -183,18 +185,6 @@ function parseColony(raw: unknown): ColonyState | null {
     log: entries.filter((e): e is Activity => e !== null).slice(0, MAX_LOG),
     logSeq: raw.logSeq,
   };
-}
-
-function parseCountdowns(raw: unknown): Record<string, number> | null {
-  if (!isRecord(raw)) return null;
-  const result: Record<string, number> = {};
-  for (const [id, seconds] of Object.entries(raw)) {
-    if (!isCount(seconds) || seconds < 1 || seconds > FORGE_SECONDS) {
-      return null;
-    }
-    result[id] = seconds;
-  }
-  return result;
 }
 
 function parsePending(raw: unknown): Record<string, PendingExpedition> | null {
@@ -267,9 +257,13 @@ function reconcile(
   const pendingExpeditions: Record<string, PendingExpedition> = {};
 
   for (const dwarf of colony.dwarves) {
-    if (dwarf.status === "forging_Tool" || dwarf.status === "forging_Weapon") {
-      const fallback = dwarf.status === "forging_Weapon" ? 5 : FORGE_SECONDS;
-      next = withCountdown(next, dwarf.id, dwarf.countdown ?? fallback);
+    if (dwarf.status === "forging_Weapon") {
+      next = withCountdown(next, dwarf.id, dwarf.countdown ?? FORGE_WEAPON_SECONDS);
+      continue;
+    }
+
+     if (dwarf.status === "forging_Tool") {
+      next = withCountdown(next, dwarf.id, dwarf.countdown ?? FORGE_TOOL_SECONDS);
       continue;
     }
 

@@ -4,7 +4,6 @@ import { ColonyState, Recepies } from "../types";
 interface RecepieProps {
   colony: ColonyState;
   recepieMethod: (dwarfId: string) => void;
-  craftCountdowns: Record<string, number>;
   name: string;
   subText: string;
   buttonText: string;
@@ -14,7 +13,6 @@ interface RecepieProps {
 export function Recepie({
   colony,
   recepieMethod,
-  craftCountdowns,
   name,
   subText,
   buttonText,
@@ -82,15 +80,18 @@ export function Recepie({
             {buttonText}
           </button>
         </div>
-        {Object.entries(craftCountdowns).map(([dwarfId, seconds]) => {
-          const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
-          if (!dwarf) return null;
-          return (
-            <p className="craft-progress" key={dwarfId}>
-              Ready in: {seconds}s — {dwarf.name} is crafting
+        {colony.dwarves
+          .filter(
+            (dwarf) =>
+              (dwarf.status === "forging_Tool" ||
+                dwarf.status === "forging_Weapon") &&
+              typeof dwarf.countdown === "number",
+          )
+          .map((dwarf) => (
+            <p className="craft-progress" key={dwarf.id}>
+              Ready in: {dwarf.countdown}s — {dwarf.name} is crafting
             </p>
-          );
-        })}
+          ))}
       </div>
     </div>
   );
