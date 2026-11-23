@@ -98,7 +98,13 @@ const asArray = (value: unknown): unknown[] | null =>
 function parseResources(raw: unknown): Resources | null {
   if (!isRecord(raw)) return null;
   const { wood, stone, food, tools, weapons } = raw;
-  if (!isCount(wood) || !isCount(stone) || !isCount(food) || !isCount(tools) || !isCount(weapons)) {
+  if (
+    !isCount(wood) ||
+    !isCount(stone) ||
+    !isCount(food) ||
+    !isCount(tools) ||
+    !isCount(weapons)
+  ) {
     return null;
   }
   return { wood, stone, food, tools, weapons };

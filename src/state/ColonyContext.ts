@@ -19,7 +19,7 @@ export interface ColonyContextValue {
   assignDwarf: (id: string, assignment: JobType) => void;
   craftTool: (dwarfId: string) => void;
   craftWeapon: (dwarfId: string) => void;
-    sendExpedition: (dwarfId: string, destination: string) => void;
+  sendExpedition: (dwarfId: string, destination: string) => void;
   toggleTool: (dwarf: Dwarf) => void;
 }
 

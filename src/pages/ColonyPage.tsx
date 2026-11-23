@@ -14,7 +14,7 @@ export function ColonyPage() {
     expeditionCountdowns,
     assignDwarf,
     sendExpedition,
-      toggleTool,
+    toggleTool,
   } = useColony();
   const [destination, setDestination] = useState("crystal-cave");
   const [expeditionDwarf, setExpeditionDwarf] = useState(

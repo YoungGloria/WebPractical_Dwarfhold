@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { beginExpedition } from "../api";
 import {
-    advanceDay,
-    DayPhase,
-    getDayPhase,
-    EXPEDITION_SECONDS,
-    DAY_MS,
-    FORGE_SECONDS,
+  advanceDay,
+  DayPhase,
+  getDayPhase,
+  EXPEDITION_SECONDS,
+  DAY_MS,
+  FORGE_SECONDS,
 } from "../simulation";
 import type { JobType, Dwarf } from "../types";
 import {
@@ -165,18 +165,18 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     setColony((current) => assignJob(current, id, assignment));
   }
 
-    function toggleTool(dwarf: Dwarf) {
-        setColony((current) =>
-            toggleToolAction(
-                current,
-                dwarf.id,
-                dwarf.hasTool,
-                dwarf.hasTool
-                    ? `${dwarf.name} put the tool back into storage.`
-                    : `${dwarf.name} equipped a tool.`,
-            ),
-        );
-    }
+  function toggleTool(dwarf: Dwarf) {
+    setColony((current) =>
+      toggleToolAction(
+        current,
+        dwarf.id,
+        dwarf.hasTool,
+        dwarf.hasTool
+          ? `${dwarf.name} put the tool back into storage.`
+          : `${dwarf.name} equipped a tool.`,
+      ),
+    );
+  }
 
   function startCraftTimer(dwarfId: string, startSeconds: number) {
     if (craftTimers.current.has(dwarfId)) return;
@@ -227,46 +227,46 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     startCraftTimer(dwarfId, FORGE_SECONDS);
   }
 
-    function craftWeapon(dwarfId: string) {
-        const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
-        if (
-            !dwarf?.specialty ||
-            (dwarf.status !== "working" && dwarf.status !== "idle")
-        )
-            return;
-        if (
-            colony.resources.wood < 4 ||
-            colony.resources.stone < 3 ||
-            craftTimers.current.has(dwarfId)
-        )
-            return;
+  function craftWeapon(dwarfId: string) {
+    const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
+    if (
+      !dwarf?.specialty ||
+      (dwarf.status !== "working" && dwarf.status !== "idle")
+    )
+      return;
+    if (
+      colony.resources.wood < 4 ||
+      colony.resources.stone < 3 ||
+      craftTimers.current.has(dwarfId)
+    )
+      return;
 
-        setColony((current) => craftWeaponAction(current, dwarfId));
-        setCraftCountdowns((current) => ({ ...current, [dwarfId]: 5 }));
+    setColony((current) => craftWeaponAction(current, dwarfId));
+    setCraftCountdowns((current) => ({ ...current, [dwarfId]: 5 }));
 
-        let remaining = 5;
-        const timer = window.setInterval(() => {
-            if (pausedRef.current) return;
+    let remaining = 5;
+    const timer = window.setInterval(() => {
+      if (pausedRef.current) return;
 
-            remaining -= 1;
-            if (remaining <= 0) {
-                window.clearInterval(timer);
-                craftTimers.current.delete(dwarfId);
-                setCraftCountdowns((current) => {
-                    const next = { ...current };
-                    delete next[dwarfId];
-                    return next;
-                });
-                setColony((current) => completeCraftWeaponAction(current, dwarfId));
-                return;
-            }
-            setCraftCountdowns((current) => ({
-                ...current,
-                [dwarfId]: remaining,
-            }));
-        }, 1_000);
-        craftTimers.current.set(dwarfId, timer);
-    }
+      remaining -= 1;
+      if (remaining <= 0) {
+        window.clearInterval(timer);
+        craftTimers.current.delete(dwarfId);
+        setCraftCountdowns((current) => {
+          const next = { ...current };
+          delete next[dwarfId];
+          return next;
+        });
+        setColony((current) => completeCraftWeaponAction(current, dwarfId));
+        return;
+      }
+      setCraftCountdowns((current) => ({
+        ...current,
+        [dwarfId]: remaining,
+      }));
+    }, 1_000);
+    craftTimers.current.set(dwarfId, timer);
+  }
 
   function startExpeditionTimer(
     dwarfId: string,
