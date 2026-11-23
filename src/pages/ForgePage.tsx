@@ -3,8 +3,7 @@ import { useColony } from "../state/ColonyContext";
 import { Recepie } from "../components/Recepie";
 
 export function ForgePage() {
-  const { colony, activities, craftTool, craftWeapon, craftCountdowns } =
-    useColony();
+  const { colony, activities, craftTool, craftWeapon } = useColony();
 
   return (
     <div className="forge-layout">
@@ -12,7 +11,6 @@ export function ForgePage() {
         <Recepie
           colony={colony}
           recepieMethod={craftTool}
-          craftCountdowns={craftCountdowns}
           name={"Craft a tool"}
           subText={"Equip the hold for future work."}
           buttonText={"Forge tool"}
@@ -21,7 +19,6 @@ export function ForgePage() {
         <Recepie
           colony={colony}
           recepieMethod={craftWeapon}
-          craftCountdowns={craftCountdowns}
           name={"Craft a Weapon"}
           subText={"Equip the hold to protect against future attacks."}
           buttonText={"Forge weapon"}

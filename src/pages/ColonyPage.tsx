@@ -11,7 +11,6 @@ export function ColonyPage() {
     colony,
     activities,
     expeditionPending,
-    expeditionCountdowns,
     assignDwarf,
     sendExpedition,
     toggleTool,
@@ -30,13 +29,15 @@ export function ColonyPage() {
       !current ||
       current.status === "expedition" ||
       current.status === "resting" ||
-      current.status === "forging"
+      current.status === "forging_Tool" ||
+      current.status === "forging_Weapon"
     ) {
       const next = colony.dwarves.find(
         (dwarf) =>
           dwarf.status !== "expedition" &&
           dwarf.status !== "resting" &&
-          dwarf.status !== "forging",
+          dwarf.status !== "forging_Tool" &&
+          dwarf.status !== "forging_Weapon",
       );
       if (next) {
         setExpeditionDwarf(next.id);
@@ -49,7 +50,8 @@ export function ColonyPage() {
     !selected ||
     selected.status === "expedition" ||
     selected.status === "resting" ||
-    selected.status === "forging" ||
+    selected.status === "forging_Tool" ||
+    selected.status === "forging_Weapon" ||
     expeditionPending;
   const awayDwarf = colony.dwarves.find(
     (dwarf) => dwarf.status === "expedition",
@@ -153,7 +155,8 @@ export function ColonyPage() {
                   (dwarf) =>
                     dwarf.status !== "expedition" &&
                     dwarf.status !== "resting" &&
-                    dwarf.status !== "forging",
+                    dwarf.status !== "forging_Tool" &&
+                    dwarf.status !== "forging_Weapon",
                 )
                 .map((dwarf) => (
                   <option key={dwarf.id} value={dwarf.id}>
@@ -188,15 +191,18 @@ export function ColonyPage() {
                 ? `${selected.name} is ready. A result returns in one request…`
                 : "No scout available. A result returns in one request…"}
           </p>
-          {Object.entries(expeditionCountdowns).map(([dwarfId, seconds]) => {
-            const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
-            if (!dwarf) return null;
-            return (
-              <p className="craft-progress" key={dwarfId}>
-                Expedition ready in: {seconds}s — {dwarf.name} is travelling
+          {colony.dwarves
+            .filter(
+              (dwarf) =>
+                dwarf.status === "expedition" &&
+                typeof dwarf.countdown === "number",
+            )
+            .map((dwarf) => (
+              <p className="craft-progress" key={dwarf.id}>
+                Expedition ready in: {dwarf.countdown}s — {dwarf.name} is
+                travelling
               </p>
-            );
-          })}
+            ))}
         </section>
 
         <Chronicle activities={activities} />

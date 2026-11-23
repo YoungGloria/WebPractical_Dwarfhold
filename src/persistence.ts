@@ -9,7 +9,12 @@ import type {
   JobType,
   Resources,
 } from "./types";
-import { DAY_MS, EXPEDITION_SECONDS, FORGE_SECONDS } from "./simulation";
+import {
+  DAY_MS,
+  EXPEDITION_SECONDS,
+  FORGE_TOOL_SECONDS,
+  FORGE_WEAPON_SECONDS,
+} from "./simulation";
 
 export const SAVE_KEY = "dwarfhold.saves";
 export const SAVE_VERSION = 1;
@@ -22,7 +27,8 @@ const STATUSES = [
   "working",
   "expedition",
   "resting",
-  "forging",
+  "forging_Tool",
+  "forging_Weapon",
 ] as const satisfies readonly DwarfStatus[];
 const JOBS = [
   "woodcutting",
@@ -46,7 +52,6 @@ export interface Snapshot {
   savedAt: number;
   colony: ColonyState;
   dayElapsedMs?: number;
-  craftCountdowns: Record<string, number>;
   pendingExpeditions: Record<string, PendingExpedition>;
 }
 
@@ -67,7 +72,6 @@ export interface RestoreNotice {
 export interface Bootstrap {
   colony: ColonyState;
   dayElapsedMs: number;
-  craftCountdowns: Record<string, number>;
   expeditionCountdowns: Record<string, number>;
   pendingExpeditions: Record<string, PendingExpedition>;
   paused: boolean;
@@ -112,7 +116,17 @@ function parseResources(raw: unknown): Resources | null {
 
 function parseDwarf(raw: unknown): Dwarf | null {
   if (!isRecord(raw)) return null;
-  const { id, name, title, icon, assignment, status, specialty, hasTool } = raw;
+  const {
+    id,
+    name,
+    title,
+    icon,
+    assignment,
+    status,
+    specialty,
+    hasTool,
+    countdown,
+  } = raw;
 
   if (
     typeof id !== "string" ||
@@ -123,6 +137,7 @@ function parseDwarf(raw: unknown): Dwarf | null {
   ) {
     return null;
   }
+  if (countdown !== undefined && !isCount(countdown)) return null;
   if (!isOneOf(STATUSES, status)) return null;
   if (assignment !== null && !isOneOf(JOBS, assignment)) return null;
   if (specialty !== undefined && !isOneOf(JOBS, specialty)) return null;
@@ -136,6 +151,7 @@ function parseDwarf(raw: unknown): Dwarf | null {
     assignment,
     status,
     ...(specialty === undefined ? {} : { specialty }),
+    ...(countdown === undefined ? {} : { countdown }),
   };
 }
 
@@ -186,18 +202,6 @@ function parseColony(raw: unknown): ColonyState | null {
   };
 }
 
-function parseCountdowns(raw: unknown): Record<string, number> | null {
-  if (!isRecord(raw)) return null;
-  const result: Record<string, number> = {};
-  for (const [id, seconds] of Object.entries(raw)) {
-    if (!isCount(seconds) || seconds < 1 || seconds > FORGE_SECONDS) {
-      return null;
-    }
-    result[id] = seconds;
-  }
-  return result;
-}
-
 function parsePending(raw: unknown): Record<string, PendingExpedition> | null {
   if (!isRecord(raw)) return null;
   const result: Record<string, PendingExpedition> = {};
@@ -244,36 +248,67 @@ function parseDayElapsedMs(raw: unknown): number | null {
  *  - expedition dwarf <=> pending request (missing request -> expedition is
  *    declared lost via failExpeditionAction, the dwarf is never stuck away)
  */
+function withCountdown(
+  colony: ColonyState,
+  dwarfId: string,
+  countdown: number,
+): ColonyState {
+  const current = colony.dwarves.find((d) => d.id === dwarfId);
+  if (!current || current.countdown === countdown) return colony;
+
+  return {
+    ...colony,
+    dwarves: colony.dwarves.map((d) =>
+      d.id === dwarfId ? { ...d, countdown } : d,
+    ),
+  };
+}
+
 function reconcile(
   colony: ColonyState,
-  countdowns: Record<string, number>,
   pending: Record<string, PendingExpedition>,
 ) {
   let next = colony;
-  const craftCountdowns: Record<string, number> = {};
   const pendingExpeditions: Record<string, PendingExpedition> = {};
 
   for (const dwarf of colony.dwarves) {
-    if (dwarf.status === "forging") {
-      craftCountdowns[dwarf.id] = countdowns[dwarf.id] ?? FORGE_SECONDS;
+    if (dwarf.status === "forging_Weapon") {
+      next = withCountdown(
+        next,
+        dwarf.id,
+        dwarf.countdown ?? FORGE_WEAPON_SECONDS,
+      );
+      continue;
     }
+
+    if (dwarf.status === "forging_Tool") {
+      next = withCountdown(
+        next,
+        dwarf.id,
+        dwarf.countdown ?? FORGE_TOOL_SECONDS,
+      );
+      continue;
+    }
+
     if (dwarf.status === "expedition") {
-      const request = pending[dwarf.id] as PendingExpedition | undefined;
-      if (request) {
-        pendingExpeditions[dwarf.id] = request;
-      } else {
+      const request = pending[dwarf.id];
+      if (!request) {
         next = failExpeditionAction(
           next,
           dwarf.id,
           `${dwarf.name}'s expedition lost its trail during the reload.`,
         );
+        continue;
       }
+
+      const countdown = dwarf.countdown ?? request.seconds;
+      pendingExpeditions[dwarf.id] = { ...request, seconds: countdown };
+      next = withCountdown(next, dwarf.id, countdown);
     }
   }
 
-  return { colony: next, craftCountdowns, pendingExpeditions };
+  return { colony: next, pendingExpeditions };
 }
-
 type Validation =
   { ok: true; snapshot: Snapshot } | { ok: false; reason: SnapshotProblem };
 
@@ -285,12 +320,10 @@ export function validateSnapshot(raw: unknown): Validation {
 
   const colony = parseColony(raw.colony);
   const dayElapsedMs = parseDayElapsedMs(raw.dayElapsedMs);
-  const countdowns = parseCountdowns(raw.craftCountdowns);
   const pending = parsePending(raw.pendingExpeditions);
   if (
     !colony ||
     dayElapsedMs === null ||
-    !countdowns ||
     !pending ||
     typeof raw.savedAt !== "number"
   ) {
@@ -303,7 +336,7 @@ export function validateSnapshot(raw: unknown): Validation {
       version: SAVE_VERSION,
       savedAt: raw.savedAt,
       dayElapsedMs,
-      ...reconcile(colony, countdowns, pending),
+      ...reconcile(colony, pending),
     },
   };
 }
@@ -408,7 +441,6 @@ export function bootstrapColony(
     return {
       colony: createInitialState(),
       dayElapsedMs: 0,
-      craftCountdowns: {},
       expeditionCountdowns: {},
       pendingExpeditions: {},
       paused: false,
@@ -420,7 +452,6 @@ export function bootstrapColony(
     return {
       colony: createInitialState(),
       dayElapsedMs: 0,
-      craftCountdowns: {},
       expeditionCountdowns: {},
       pendingExpeditions: {},
       paused: true,
@@ -446,25 +477,23 @@ export function bootstrapColony(
   );
 
   // Visible policy (D5.4 / D5.5), one line per interrupted task
-  const nameOf = (id: string) =>
-    colony.dwarves.find((d) => d.id === id)?.name ?? id;
-  for (const id of Object.keys(snapshot.craftCountdowns)) {
-    colony = log(
-      colony,
-      `${nameOf(id)}'s forging continues once the hold is awake.`,
-    );
-  }
-  for (const id of Object.keys(snapshot.pendingExpeditions)) {
-    colony = log(
-      colony,
-      `${nameOf(id)}'s expedition continues once the hold is awake.`,
-    );
+  for (const dwarf of colony.dwarves) {
+    if (dwarf.status === "forging_Tool" || dwarf.status === "forging_Weapon") {
+      colony = log(
+        colony,
+        `${dwarf.name}'s forging continues once the hold is awake.`,
+      );
+    } else if (dwarf.status === "expedition") {
+      colony = log(
+        colony,
+        `${dwarf.name}'s expedition continues once the hold is awake.`,
+      );
+    }
   }
 
   return {
     colony,
     dayElapsedMs: snapshot.dayElapsedMs ?? 0,
-    craftCountdowns: snapshot.craftCountdowns,
     expeditionCountdowns: Object.fromEntries(
       Object.entries(snapshot.pendingExpeditions).map(([dwarfId, request]) => [
         dwarfId,

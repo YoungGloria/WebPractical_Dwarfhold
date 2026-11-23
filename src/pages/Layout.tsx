@@ -11,12 +11,15 @@ export function Layout() {
     togglePaused,
     dayPhase,
     daySecondsLeft,
-    craftCountdowns,
     restoreNotice,
     dismissRestoreNotice,
   } = useColony();
 
-  const hasActiveCrafts = Object.keys(craftCountdowns).length > 0;
+  const hasActiveCrafts = colony.dwarves.some(
+    (dwarf) =>
+      (dwarf.status === "forging_Tool" || dwarf.status === "forging_Weapon") &&
+      typeof dwarf.countdown === "number",
+  );
 
   return (
     <main>
