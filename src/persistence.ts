@@ -6,6 +6,7 @@ import type {
   ColonyState,
   Dwarf,
   DwarfStatus,
+  DwarfSpecies,
   JobType,
   Resources,
 } from "./types";
@@ -36,6 +37,7 @@ const JOBS = [
   "farming",
 ] as const satisfies readonly Exclude<JobType, null>[];
 const TONES = ["good", "warning"] as const;
+const SPECIES = ["dwarf", "knight"] as const satisfies readonly DwarfSpecies[];
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -118,6 +120,7 @@ function parseDwarf(raw: unknown): Dwarf | null {
   if (!isRecord(raw)) return null;
   const {
     id,
+    species,
     name,
     title,
     icon,
@@ -142,8 +145,17 @@ function parseDwarf(raw: unknown): Dwarf | null {
   if (assignment !== null && !isOneOf(JOBS, assignment)) return null;
   if (specialty !== undefined && !isOneOf(JOBS, specialty)) return null;
 
+  const resolvedSpecies: DwarfSpecies =
+    species === undefined
+      ? "dwarf"
+      : isOneOf(SPECIES, species)
+        ? species
+        : null!;
+  if (species !== undefined && !isOneOf(SPECIES, species)) return null;
+
   return {
     id,
+    species: resolvedSpecies,
     name,
     hasTool,
     title,
@@ -182,6 +194,13 @@ function parseColony(raw: unknown): ColonyState | null {
     return null;
   }
 
+  if (
+    raw.sirOneUperJoined !== undefined &&
+    typeof raw.sirOneUperJoined !== "boolean"
+  ) {
+    return null;
+  }
+
   const dwarves = dwarfList.map(parseDwarf);
   const entries = logList.map(parseActivity);
   if (dwarves.some((d) => d === null) || entries.some((e) => e === null)) {
@@ -199,6 +218,7 @@ function parseColony(raw: unknown): ColonyState | null {
     dwarves: validDwarves,
     log: entries.filter((e): e is Activity => e !== null).slice(0, MAX_LOG),
     logSeq: raw.logSeq,
+    sirOneUperJoined: raw.sirOneUperJoined ?? false,
   };
 }
 
