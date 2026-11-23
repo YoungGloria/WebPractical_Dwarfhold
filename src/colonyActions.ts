@@ -12,7 +12,8 @@ export function assignJob(
     !dwarf ||
     dwarf.status === "expedition" ||
     dwarf.status === "resting" ||
-    dwarf.status === "forging"
+    dwarf.status === "forging_Tool" ||
+    dwarf.status === "forging_Weapon"
   )
     return state;
 
@@ -41,8 +42,8 @@ export function craftToolAction(
     !dwarf?.specialty ||
     dwarf.status === "expedition" ||
     dwarf.status === "resting" ||
-    dwarf.status === "forging"
-  )
+    dwarf.status === "forging_Tool" ||
+    dwarf.status === "forging_Weapon")
     return state;
 
   if (state.resources.wood < 3 || state.resources.stone < 2) {
@@ -58,7 +59,7 @@ export function craftToolAction(
         stone: state.resources.stone - 2,
       },
       dwarves: state.dwarves.map((d) =>
-        d.id === dwarfId ? { ...d, status: "forging" as const } : d,
+        d.id === dwarfId ? { ...d, status: "forging_Tool" as const } : d,
       ),
     },
     `${dwarf.name} started forging a beautiful tool.`,
@@ -71,7 +72,7 @@ export function completeCraftToolAction(
   dwarfId: string,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
-  if (dwarf?.status !== "forging") return state;
+  if (dwarf?.status !== "forging_Tool") return state;
 
   return log(
     {
@@ -98,7 +99,8 @@ export function craftWeaponAction(
     !dwarf?.specialty ||
     dwarf.status === "expedition" ||
     dwarf.status === "resting" ||
-    dwarf.status === "forging"
+    dwarf.status === "forging_Tool" ||
+    dwarf.status === "forging_Weapon"
   )
     return state;
 
@@ -115,7 +117,7 @@ export function craftWeaponAction(
         stone: state.resources.stone - 3,
       },
       dwarves: state.dwarves.map((d) =>
-        d.id === dwarfId ? { ...d, status: "forging" as const } : d,
+        d.id === dwarfId ? { ...d, status: "forging_Weapon" as const } : d,
       ),
     },
     `${dwarf.name} started forging a beautiful weapon.`,
@@ -128,7 +130,7 @@ export function completeCraftWeaponAction(
   dwarfId: string,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
-  if (dwarf?.status !== "forging") return state;
+  if (dwarf?.status !== "forging_Weapon") return state;
 
   return log(
     {
@@ -156,7 +158,7 @@ export function startExpeditionAction(
   destination: string,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
-  if (!dwarf || dwarf?.status === "expedition") return state; // Dwarf not found or already on an expedition
+  if (!dwarf || dwarf?.status === "expedition" || dwarf?.status === "forging_Tool" || dwarf?.status === "forging_Weapon" || dwarf?.status === "resting") return state; // Dwarf not found or already on an expedition
 
   const dwarves = state.dwarves.map((d) =>
     d.id === dwarfId ? { ...d, status: "expedition" as const } : d,
