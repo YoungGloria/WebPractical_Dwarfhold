@@ -19,7 +19,7 @@ export function Popup({ header, subHeader, message, onClose }: PopupProps) {
         <span>{message}</span>
       </div>
       {onClose && (
-        <button className=".popup-close" onClick={onClose}>
+        <button className="popup-close" onClick={onClose}>
           Close
         </button>
       )}

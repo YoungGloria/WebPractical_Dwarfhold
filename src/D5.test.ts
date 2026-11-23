@@ -65,14 +65,17 @@ describe("D5 persistence", () => {
     expect(boot.colony.day).toBe(createInitialState().day);
   });
 
-  it("restores the colony after a roundtrip (paused, no popup)", () => {
+  it("restores the colony after a roundtrip (paused, with popup)", () => {
     const storage = fakeStorage();
     saveSnapshot(snapshotOf(onDay(20)), storage);
     const boot = bootstrapColony(storage);
     expect(boot.colony.day).toBe(20);
     expect(boot.paused).toBe(true);
-    expect(boot.notice).toBeNull();
-    expect(boot.colony.log[0]?.message).toContain("restored");
+    expect(boot.notice).toEqual({
+      header: "Latest save restored",
+      message: "Day 20 was restored..",
+      subHeader: "No progress was lost.",
+    });
   });
 
   it("keeps at most 5 snapshots, newest first", () => {
