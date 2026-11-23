@@ -410,11 +410,7 @@ export function bootstrapColony(
 
   if (result.status === "fallback") {
     return {
-      colony: log(
-        createInitialState(),
-        "The saved hold could not be read. A new hold was founded.",
-        "warning",
-      ),
+      colony: createInitialState(),
       dayElapsedMs: 0,
       craftCountdowns: {},
       expeditionCountdowns: {},
@@ -471,11 +467,15 @@ export function bootstrapColony(
     paused: true,
     notice:
       skipped === 0
-        ? null
+        ? {
+            header: "Latest save restored",
+            subHeader: `No progress was lost.`,
+            message: `Day ${snapshot.colony.day} was restored..`,
+          }
         : {
             header: "Older save restored",
-            subHeader: `${skipped} newer save${skipped === 1 ? "" : "s"} could not be read.`,
-            message: `Day ${snapshot.colony.day} was restored. Progress after that point is lost.`,
+            subHeader: `Some progress was lost.`,
+            message: `Day ${snapshot.colony.day} at ${snapshot.savedAt} was restored. Progress after that point is lost.`,
           },
   };
 }
