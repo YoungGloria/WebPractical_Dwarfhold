@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { beginExpedition } from "../api";
-import { createInitialState } from "../initialState";
 import {
     advanceDay,
     DayPhase,
