@@ -11,7 +11,6 @@ export function ColonyPage() {
     colony,
     activities,
     expeditionPending,
-    expeditionCountdowns,
     assignDwarf,
     sendExpedition,
     toggleTool,
@@ -172,15 +171,17 @@ export function ColonyPage() {
               <option value="crystal-cave">Crystal Cave</option>
               <option value="old-mine">The Old Mine</option>
               <option value="blocked-pass">Blocked Pass</option>
-              <option value="abandoned-fortifications">
-                Abandoned Fortifications
-              </option>
+              <option value="abandoned-fortifications">Abandoned Fortifications</option>
             </select>
           </label>
 
           <button
             disabled={blocked}
-            onClick={() => sendExpedition(expeditionDwarf, destination)} // onClick expects a function that returns void
+            onClick={() =>
+              void sendExpedition(expeditionDwarf, destination).catch((error) =>
+                console.error("Failed to send expedition:", error),
+              )
+            } // onClick expects a function that returns void
           >
             {expeditionPending ? "Beyond the gate…" : "Send expedition"}
           </button>
@@ -191,15 +192,6 @@ export function ColonyPage() {
                 ? `${selected.name} is ready. A result returns in one request…`
                 : "No scout available. A result returns in one request…"}
           </p>
-          {Object.entries(expeditionCountdowns).map(([dwarfId, seconds]) => {
-            const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
-            if (!dwarf) return null;
-            return (
-              <p className="craft-progress" key={dwarfId}>
-                Expedition ready in: {seconds}s — {dwarf.name} is travelling
-              </p>
-            );
-          })}
         </section>
 
         <Chronicle activities={activities} />
