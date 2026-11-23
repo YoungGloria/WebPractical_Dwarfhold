@@ -2,6 +2,12 @@ import type { ColonyState, Dwarf, JobType, Resources } from "./types";
 import { isFamine } from "./utils";
 import { log } from "./stateUtils";
 
+// Constants for simulation
+// TODO: link all related input to these constants
+export const DAY_MS = 8_000;
+export const FORGE_SECONDS = 5;
+export const EXPEDITION_SECONDS = 5;
+
 export const production: Record<Exclude<JobType, null>, Partial<Resources>> = {
   woodcutting: { wood: 3 },
   mining: { stone: 2 },
@@ -60,31 +66,21 @@ export const jobLabel = (job: JobType) =>
     : "Unassigned";
 
 // Helper functions to display dynamic daytime statements
-export type DayPhase = "early_morning" | "lunchtime" | "deep_day" | "evening";
+export type DayPhase = "EARLY MORNING" | "LUNCHTIME" | "DEEP DAY" | "EVENING";
 
 export function getDayPhase(elapsedMs: number): DayPhase {
-  const clamped = Math.max(0, Math.min(elapsedMs, 7_999));
-  const index = Math.floor(clamped / 2_000); // day (8s) divided into 4 phases (2s each)
+  const phases = [
+    "EARLY MORNING",
+    "LUNCHTIME",
+    "DEEP DAY",
+    "EVENING",
+  ] as const satisfies readonly DayPhase[];
 
-  const phases: DayPhase[] = [
-    "early_morning",
-    "lunchtime",
-    "deep_day",
-    "evening",
-  ];
+  const clampedMs = Math.max(0, Math.min(elapsedMs, DAY_MS - 1));
+  const elapsedSeconds = clampedMs / 1_000;
+  const totalSeconds = DAY_MS / 1_000;
+  const secondsPerPhase = totalSeconds / phases.length;
+  const index = Math.floor(elapsedSeconds / secondsPerPhase);
 
-  return phases[index];
-}
-
-export function dayPhaseLabel(phase: DayPhase): string {
-  switch (phase) {
-    case "early_morning":
-      return "EARLY MORNING";
-    case "lunchtime":
-      return "LUNCHTIME";
-    case "deep_day":
-      return "DEEP DAY";
-    case "evening":
-      return "EVENING";
-  }
+  return phases[index] ?? phases[0];
 }

@@ -2,9 +2,10 @@ interface PopupProps {
   header: string;
   subHeader: string;
   message: string;
+  onClose?: () => void;
 }
 
-export function Popup({ header, subHeader, message }: PopupProps) {
+export function Popup({ header, subHeader, message, onClose }: PopupProps) {
   return (
     <section className="panel popup">
       <header>
@@ -17,6 +18,11 @@ export function Popup({ header, subHeader, message }: PopupProps) {
       <div className="content net-line">
         <span>{message}</span>
       </div>
+      {onClose && (
+        <button className=".popup-close" onClick={onClose}>
+          Close
+        </button>
+      )}
     </section>
   );
 }

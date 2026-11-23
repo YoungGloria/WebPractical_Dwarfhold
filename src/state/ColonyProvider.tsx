@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { beginExpedition } from "../api";
-import { createInitialState } from "../initialState";
-import { advanceDay, DayPhase, getDayPhase } from "../simulation";
+import {
+  advanceDay,
+  DayPhase,
+  getDayPhase,
+  EXPEDITION_SECONDS,
+  DAY_MS,
+  FORGE_SECONDS,
+} from "../simulation";
 import type { JobType } from "../types";
 import {
   assignJob,
@@ -11,38 +17,109 @@ import {
   failExpeditionAction,
   startExpeditionAction,
 } from "../colonyActions";
+import {
+  bootstrapColony,
+  clearColonySave,
+  saveSnapshot,
+  SAVE_VERSION,
+  type PendingExpedition,
+} from "../persistence";
 import { ColonyContext, type ColonyContextValue } from "./ColonyContext";
 
 export function ColonyProvider({ children }: { children: ReactNode }) {
-  const [colony, setColony] = useState(createInitialState);
-  const [paused, setPaused] = useState(false);
+  // Read the save exactly once (synchronous localStorage)
+  const [boot] = useState(() => bootstrapColony());
+
+  const [colony, setColony] = useState(boot.colony);
+  const [paused, setPaused] = useState(boot.paused);
+  const [restoreNotice, setRestoreNotice] = useState(boot.notice);
+  const [craftCountdowns, setCraftCountdowns] = useState(boot.craftCountdowns);
+  const [expeditionCountdowns, setExpeditionCountdowns] = useState(
+    boot.expeditionCountdowns,
+  );
+
+  const firstSave = useRef(true); // Needed to ensure multiple reloads do not fill the ring buffer with duplicate snapshots
   const inFlight = useRef(new Set<string>()); // Track dwarves currently on expeditions
   const craftTimers = useRef(new Map<string, number>());
+  const expeditionTimers = useRef(new Map<string, number>());
   const pausedRef = useRef(paused);
-  const [craftCountdowns, setCraftCountdowns] = useState<
-    Record<string, number>
-  >({});
+  const pendingRequests = useRef(
+    new Map<string, PendingExpedition>(Object.entries(boot.pendingExpeditions)),
+  );
 
   useEffect(() => {
     pausedRef.current = paused;
   }, [paused]);
 
+  const snapshot = () => ({
+    version: SAVE_VERSION,
+    savedAt: Date.now(),
+    colony,
+    dayElapsedMs: elapsedMs.current,
+    craftCountdowns,
+    pendingExpeditions: Object.fromEntries(pendingRequests.current),
+  });
+
+  // Keep a reference to the latest snapshot to use in effects that need it
+  const snapshotRef = useRef(snapshot);
+  snapshotRef.current = snapshot;
+
+  // Significant events: the colony only changes through day tick, assign,
+  // forge start/end and expedition start/end -> push a new snapshot.
+  useEffect(() => {
+    saveSnapshot(
+      snapshotRef.current(),
+      undefined,
+      firstSave.current ? "replaceHead" : "push",
+    );
+    firstSave.current = false;
+  }, [colony]);
+
+  // Forge and Expedition progress: refresh the newest snapshot in place every second, so a
+  // reload resumes with the exact remaining time without flooding the ring.
+  useEffect(() => {
+    saveSnapshot(snapshotRef.current(), undefined, "replaceHead");
+  }, [craftCountdowns]);
+
+  useEffect(() => {
+    saveSnapshot(snapshotRef.current(), undefined, "replaceHead");
+  }, [expeditionCountdowns]);
+
+  // Resume interrupted tasks once after the first mount
+  useEffect(() => {
+    Object.entries(boot.craftCountdowns).forEach(([dwarfId, seconds]) =>
+      startCraftTimer(dwarfId, seconds),
+    );
+    Object.entries(boot.pendingExpeditions).forEach(([dwarfId, request]) => {
+      startExpeditionTimer(
+        dwarfId,
+        request.destination,
+        request.requestId,
+        request.seconds,
+      );
+    });
+  }, []);
+
   useEffect(
     () => () => {
       craftTimers.current.forEach((timer) => window.clearInterval(timer));
       craftTimers.current.clear();
+      expeditionTimers.current.forEach((timer) => window.clearInterval(timer));
+      expeditionTimers.current.clear();
     },
     [],
   );
 
   // Track elapsed time for day phase updates
+  const elapsedMs = useRef(boot.dayElapsedMs);
+  const [dayPhase, setDayPhase] = useState<DayPhase>(() =>
+    getDayPhase(boot.dayElapsedMs),
+  );
+  const [daySecondsLeft, setDaySecondsLeft] = useState(() =>
+    Math.ceil((DAY_MS - boot.dayElapsedMs) / 1_000),
+  );
 
-  const TICK_MS = 200; // Update every 200ms
-  const DAY_MS = 8_000; // Total duration of a day in milliseconds (8 seconds)
-
-  const elapsedMs = useRef(0);
-  const [dayPhase, setDayPhase] = useState<DayPhase>("early_morning");
-  const [daySecondsLeft, setDaySecondsLeft] = useState(8);
+  const TICK_MS = 1_000; // Update every 1000ms
 
   useEffect(() => {
     if (paused) return;
@@ -59,11 +136,15 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       // Get the current day phase based on elapsed time and update state if it has changed
       const newPhase = getDayPhase(elapsedMs.current);
       setDayPhase((prev) => (prev === newPhase ? prev : newPhase));
+
       // Update the countdown for the next deep day
       const nextSecondsLeft = Math.ceil((DAY_MS - elapsedMs.current) / 1_000); // Display only full seconds: .ceil returns smallest integer greater than or equal to the given number
       setDaySecondsLeft((prev) =>
         prev === nextSecondsLeft ? prev : nextSecondsLeft,
       );
+
+      // Update the snapshot every tick to ensure the elapsed time is saved
+      saveSnapshot(snapshotRef.current(), undefined, "replaceHead");
     }, TICK_MS);
 
     return () => window.clearInterval(timer);
@@ -81,24 +162,10 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     setColony((current) => assignJob(current, id, assignment));
   }
 
-  function craftTool(dwarfId: string) {
-    const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
-    if (
-      !dwarf?.specialty ||
-      (dwarf.status !== "working" && dwarf.status !== "idle")
-    )
-      return;
-    if (
-      colony.resources.wood < 3 ||
-      colony.resources.stone < 2 ||
-      craftTimers.current.has(dwarfId)
-    )
-      return;
+  function startCraftTimer(dwarfId: string, startSeconds: number) {
+    if (craftTimers.current.has(dwarfId)) return;
 
-    setColony((current) => craftToolAction(current, dwarfId));
-    setCraftCountdowns((current) => ({ ...current, [dwarfId]: 5 }));
-
-    let remaining = 5;
+    let remaining = startSeconds;
     const timer = window.setInterval(() => {
       if (pausedRef.current) return;
 
@@ -122,24 +189,80 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     craftTimers.current.set(dwarfId, timer);
   }
 
-  async function sendExpedition(dwarfId: string, destination: string) {
-    const dwarf = colony.dwarves.find((d) => d.id === dwarfId);
+  function craftTool(dwarfId: string) {
+    const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
     if (
-      !dwarf ||
-      dwarf.status === "expedition" ||
-      inFlight.current.has(dwarfId)
+      !dwarf?.specialty ||
+      (dwarf.status !== "working" && dwarf.status !== "idle")
     )
-      return; // Prevent sending a dwarf on an expedition if they are already on one or if the expedition is in flight - optional chaining is not possible because dwarf not found -> undefined -> false
+      return;
+    if (
+      colony.resources.wood < 3 ||
+      colony.resources.stone < 2 ||
+      craftTimers.current.has(dwarfId)
+    )
+      return;
 
+    setColony((current) => craftToolAction(current, dwarfId));
+    setCraftCountdowns((current) => ({
+      ...current,
+      [dwarfId]: FORGE_SECONDS,
+    }));
+    startCraftTimer(dwarfId, FORGE_SECONDS);
+  }
+
+  function startExpeditionTimer(
+    dwarfId: string,
+    destination: string,
+    requestId: string,
+    startSeconds: number,
+  ) {
+    if (expeditionTimers.current.has(dwarfId)) return;
+
+    let remaining = startSeconds;
+    const timer = window.setInterval(() => {
+      if (pausedRef.current) return;
+
+      remaining -= 1;
+      if (remaining <= 0) {
+        window.clearInterval(timer);
+        expeditionTimers.current.delete(dwarfId);
+        setExpeditionCountdowns((current) => {
+          const next = { ...current };
+          delete next[dwarfId];
+          return next;
+        });
+        void runExpedition(dwarfId, destination, requestId);
+        return;
+      }
+      // Pending is updated before the countdown to ensure that the most current info is included in the snapshot
+      const pending = pendingRequests.current.get(dwarfId);
+      if (pending) {
+        pendingRequests.current.set(dwarfId, {
+          ...pending,
+          seconds: remaining,
+        });
+      }
+      setExpeditionCountdowns((current) => ({
+        ...current,
+        [dwarfId]: remaining,
+      }));
+    }, 1_000);
+    expeditionTimers.current.set(dwarfId, timer);
+  }
+
+  // Used only after the expedition countdown reaches zero.
+  async function runExpedition(
+    dwarfId: string,
+    destination: string,
+    requestId: string,
+  ) {
+    if (inFlight.current.has(dwarfId)) return;
     inFlight.current.add(dwarfId);
-    setColony((current) =>
-      startExpeditionAction(current, dwarfId, destination),
-    );
-
-    const requestId = crypto.randomUUID();
 
     try {
       const result = await beginExpedition(dwarfId, destination, requestId);
+      pendingRequests.current.delete(dwarfId); // before setColony -> consistent save
       setColony((current) =>
         completeExpeditionAction(
           current,
@@ -149,6 +272,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
         ),
       );
     } catch (error) {
+      pendingRequests.current.delete(dwarfId);
       setColony((current) =>
         failExpeditionAction(
           current,
@@ -163,6 +287,39 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  function sendExpedition(dwarfId: string, destination: string) {
+    const dwarf = colony.dwarves.find((d) => d.id === dwarfId);
+    if (
+      !dwarf ||
+      dwarf.status === "expedition" ||
+      dwarf.status === "resting" ||
+      dwarf.status === "forging" ||
+      pendingRequests.current.has(dwarfId) ||
+      inFlight.current.has(dwarfId)
+    )
+      return; // Prevent sending a dwarf on an expedition if they are already on one or if the expedition is in flight - optional chaining is not possible because dwarf not found -> undefined -> false
+
+    const requestId = crypto.randomUUID();
+    pendingRequests.current.set(dwarfId, {
+      destination,
+      requestId,
+      seconds: EXPEDITION_SECONDS,
+    });
+    setColony((current) =>
+      startExpeditionAction(current, dwarfId, destination),
+    );
+    setExpeditionCountdowns((current) => ({
+      ...current,
+      [dwarfId]: EXPEDITION_SECONDS,
+    }));
+    startExpeditionTimer(dwarfId, destination, requestId, EXPEDITION_SECONDS);
+  }
+
+  function newGame() {
+    clearColonySave();
+    window.location.reload(); // nothing is saved on unload, so the reset sticks
+  }
+
   const expeditionPending = colony.dwarves.some(
     (d) => d.status === "expedition",
   );
@@ -175,6 +332,10 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     craftCountdowns,
     dayPhase,
     daySecondsLeft,
+    expeditionCountdowns,
+    restoreNotice,
+    dismissRestoreNotice: () => setRestoreNotice(null),
+    newGame,
     togglePaused: () => setPaused((value) => !value),
     assignDwarf,
     craftTool,

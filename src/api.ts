@@ -52,7 +52,13 @@ export async function beginExpedition(
   dwarfId: string,
   destination: string,
   requestId: string,
-  { retries = 2, timeoutMs = 10_000 } = {},
+  {
+    retries = 2,
+    timeoutMs = 10_000,
+  }: {
+    retries?: number;
+    timeoutMs?: number;
+  } = {},
 ): Promise<ExpeditionResult> {
   for (let attempt = 0; ; attempt += 1) {
     try {
