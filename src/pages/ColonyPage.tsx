@@ -172,7 +172,9 @@ export function ColonyPage() {
               <option value="crystal-cave">Crystal Cave</option>
               <option value="old-mine">The Old Mine</option>
               <option value="blocked-pass">Blocked Pass</option>
-              <option value="abandoned-fortifications">Abandoned Fortifications</option>
+              <option value="abandoned-fortifications">
+                Abandoned Fortifications
+              </option>
             </select>
           </label>
 
