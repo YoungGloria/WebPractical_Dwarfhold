@@ -42,6 +42,7 @@ export function advanceDay(state: ColonyState): ColonyState {
     Object.entries(output).forEach(([resource, amount]) => {
       amount = amount ? amount + famineModefier : 0;
       if (dwarf.hasTool) amount += 1;
+      if (dwarf.species === "knight") amount +=1;
       resources[resource as keyof Resources] += amount;
     });
   });
