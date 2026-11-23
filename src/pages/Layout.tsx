@@ -3,7 +3,6 @@ import { ResourceBar } from "../components/ResourceBar";
 import { useColony } from "../state/ColonyContext";
 import { Popup } from "../components/Popup";
 import { isFamine } from "../utils";
-import { dayPhaseLabel } from "../simulation";
 
 export function Layout() {
   const {
@@ -39,7 +38,7 @@ export function Layout() {
         </div>
 
         <div className="day">
-          <small>{dayPhaseLabel(dayPhase)}</small>
+          <small>{dayPhase}</small>
           <strong>{colony.day}</strong>
           <button onClick={togglePaused}>
             {paused ? "Wake the hold" : "Pause"}
@@ -54,7 +53,7 @@ export function Layout() {
         <NavLink to="/forge">Forge</NavLink>
       </nav>
 
-      {isFamine(colony) ? (
+      {isFamine(useColony().colony) ? (
         <Popup
           header="Famine"
           subHeader="It has been a long time since they have eaten."
@@ -75,7 +74,7 @@ export function Layout() {
 
       <footer>
         <span>{hasActiveCrafts ? "🔥 Forge: burning" : "🪵 Forge: idle"}</span>
-        <span>Next deep day in ~{daySecondsLeft} seconds</span>
+        <span>Next day in ~{daySecondsLeft} seconds</span>
         <span>{paused ? "The hold is resting" : "⚙ Simulation active"}</span>
       </footer>
     </main>

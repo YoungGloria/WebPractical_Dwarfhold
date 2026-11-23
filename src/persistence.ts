@@ -9,13 +9,11 @@ import type {
   JobType,
   Resources,
 } from "./types";
+import { DAY_MS, EXPEDITION_SECONDS, FORGE_SECONDS } from "./simulation";
 
 export const SAVE_KEY = "dwarfhold.saves";
 export const SAVE_VERSION = 1;
 export const MAX_SAVES = 5;
-// TODO: use a central constant for the forge duration, so that it is not duplicated in the simulation and persistence modules
-export const FORGE_SECONDS = 5;
-export const EXPEDITION_SECONDS = 5;
 
 // Single source of truth for allowed values.
 // New statuses/jobs/resources must be added here and in the matching parse function.
@@ -47,6 +45,7 @@ export interface Snapshot {
   version: number;
   savedAt: number;
   colony: ColonyState;
+  dayElapsedMs?: number;
   craftCountdowns: Record<string, number>;
   pendingExpeditions: Record<string, PendingExpedition>;
 }
@@ -67,6 +66,7 @@ export interface RestoreNotice {
 
 export interface Bootstrap {
   colony: ColonyState;
+  dayElapsedMs: number;
   craftCountdowns: Record<string, number>;
   expeditionCountdowns: Record<string, number>;
   pendingExpeditions: Record<string, PendingExpedition>;
@@ -216,6 +216,19 @@ function parsePending(raw: unknown): Record<string, PendingExpedition> | null {
   return result;
 }
 
+function parseDayElapsedMs(raw: unknown): number | null {
+  if (raw === undefined) return 0;
+  if (
+    typeof raw !== "number" ||
+    !Number.isFinite(raw) ||
+    raw < 0 ||
+    raw >= DAY_MS
+  ) {
+    return null;
+  }
+  return raw;
+}
+
 /**
  * Makes colony, countdowns and pending requests agree with each other, so that
  * every accepted snapshot is internally consistent:
@@ -263,9 +276,16 @@ export function validateSnapshot(raw: unknown): Validation {
     return { ok: false, reason: "incompatible" };
 
   const colony = parseColony(raw.colony);
+  const dayElapsedMs = parseDayElapsedMs(raw.dayElapsedMs);
   const countdowns = parseCountdowns(raw.craftCountdowns);
   const pending = parsePending(raw.pendingExpeditions);
-  if (!colony || !countdowns || !pending || typeof raw.savedAt !== "number") {
+  if (
+    !colony ||
+    dayElapsedMs === null ||
+    !countdowns ||
+    !pending ||
+    typeof raw.savedAt !== "number"
+  ) {
     return { ok: false, reason: "corrupt" };
   }
 
@@ -274,6 +294,7 @@ export function validateSnapshot(raw: unknown): Validation {
     snapshot: {
       version: SAVE_VERSION,
       savedAt: raw.savedAt,
+      dayElapsedMs,
       ...reconcile(colony, countdowns, pending),
     },
   };
@@ -378,6 +399,7 @@ export function bootstrapColony(
   if (result.status === "empty") {
     return {
       colony: createInitialState(),
+      dayElapsedMs: 0,
       craftCountdowns: {},
       expeditionCountdowns: {},
       pendingExpeditions: {},
@@ -393,6 +415,7 @@ export function bootstrapColony(
         "The saved hold could not be read. A new hold was founded.",
         "warning",
       ),
+      dayElapsedMs: 0,
       craftCountdowns: {},
       expeditionCountdowns: {},
       pendingExpeditions: {},
@@ -433,6 +456,7 @@ export function bootstrapColony(
 
   return {
     colony,
+    dayElapsedMs: snapshot.dayElapsedMs ?? 0,
     craftCountdowns: snapshot.craftCountdowns,
     expeditionCountdowns: Object.fromEntries(
       Object.entries(snapshot.pendingExpeditions).map(([dwarfId, request]) => [

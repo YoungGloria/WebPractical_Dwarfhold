@@ -3,7 +3,6 @@ import { createInitialState } from "./initialState";
 import {
   bootstrapColony,
   clearColonySave,
-  FORGE_SECONDS,
   loadSnapshot,
   MAX_SAVES,
   SAVE_KEY,
@@ -12,6 +11,7 @@ import {
   type Snapshot,
   type StorageLike,
 } from "./persistence";
+import { FORGE_SECONDS } from "./simulation";
 import type { ColonyState } from "./types";
 
 function fakeStorage(

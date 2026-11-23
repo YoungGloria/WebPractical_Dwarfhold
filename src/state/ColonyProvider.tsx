@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { beginExpedition } from "../api";
-import { advanceDay, DayPhase, getDayPhase } from "../simulation";
+import {
+  advanceDay,
+  DayPhase,
+  getDayPhase,
+  EXPEDITION_SECONDS,
+  DAY_MS,
+  FORGE_SECONDS,
+} from "../simulation";
 import type { JobType } from "../types";
 import {
   assignJob,
@@ -13,8 +20,6 @@ import {
 import {
   bootstrapColony,
   clearColonySave,
-  EXPEDITION_SECONDS,
-  FORGE_SECONDS,
   saveSnapshot,
   SAVE_VERSION,
   type PendingExpedition,
@@ -33,6 +38,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     boot.expeditionCountdowns,
   );
 
+  const firstSave = useRef(true); // Needed to ensure multiple reloads do not fill the ring buffer with duplicate snapshots
   const inFlight = useRef(new Set<string>()); // Track dwarves currently on expeditions
   const craftTimers = useRef(new Map<string, number>());
   const expeditionTimers = useRef(new Map<string, number>());
@@ -49,24 +55,34 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     version: SAVE_VERSION,
     savedAt: Date.now(),
     colony,
+    dayElapsedMs: elapsedMs.current,
     craftCountdowns,
     pendingExpeditions: Object.fromEntries(pendingRequests.current),
   });
 
+  // Keep a reference to the latest snapshot to use in effects that need it
+  const snapshotRef = useRef(snapshot);
+  snapshotRef.current = snapshot;
+
   // Significant events: the colony only changes through day tick, assign,
   // forge start/end and expedition start/end -> push a new snapshot.
   useEffect(() => {
-    saveSnapshot(snapshot());
+    saveSnapshot(
+      snapshotRef.current(),
+      undefined,
+      firstSave.current ? "replaceHead" : "push",
+    );
+    firstSave.current = false;
   }, [colony]);
 
   // Forge and Expedition progress: refresh the newest snapshot in place every second, so a
   // reload resumes with the exact remaining time without flooding the ring.
   useEffect(() => {
-    saveSnapshot(snapshot(), undefined, "replaceHead");
+    saveSnapshot(snapshotRef.current(), undefined, "replaceHead");
   }, [craftCountdowns]);
 
   useEffect(() => {
-    saveSnapshot(snapshot(), undefined, "replaceHead");
+    saveSnapshot(snapshotRef.current(), undefined, "replaceHead");
   }, [expeditionCountdowns]);
 
   // Resume interrupted tasks once after the first mount
@@ -95,13 +111,15 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   );
 
   // Track elapsed time for day phase updates
+  const elapsedMs = useRef(boot.dayElapsedMs);
+  const [dayPhase, setDayPhase] = useState<DayPhase>(() =>
+    getDayPhase(boot.dayElapsedMs),
+  );
+  const [daySecondsLeft, setDaySecondsLeft] = useState(() =>
+    Math.ceil((DAY_MS - boot.dayElapsedMs) / 1_000),
+  );
 
-  const TICK_MS = 200; // Update every 200ms
-  const DAY_MS = 8_000; // Total duration of a day in milliseconds (8 seconds)
-
-  const elapsedMs = useRef(0);
-  const [dayPhase, setDayPhase] = useState<DayPhase>("early_morning");
-  const [daySecondsLeft, setDaySecondsLeft] = useState(8);
+  const TICK_MS = 1_000; // Update every 1000ms
 
   useEffect(() => {
     if (paused) return;
@@ -118,11 +136,15 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       // Get the current day phase based on elapsed time and update state if it has changed
       const newPhase = getDayPhase(elapsedMs.current);
       setDayPhase((prev) => (prev === newPhase ? prev : newPhase));
+
       // Update the countdown for the next deep day
       const nextSecondsLeft = Math.ceil((DAY_MS - elapsedMs.current) / 1_000); // Display only full seconds: .ceil returns smallest integer greater than or equal to the given number
       setDaySecondsLeft((prev) =>
         prev === nextSecondsLeft ? prev : nextSecondsLeft,
       );
+
+      // Update the snapshot every tick to ensure the elapsed time is saved
+      saveSnapshot(snapshotRef.current(), undefined, "replaceHead");
     }, TICK_MS);
 
     return () => window.clearInterval(timer);
