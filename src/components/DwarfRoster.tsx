@@ -33,7 +33,8 @@ export function DwarfRoster({ dwarves, onAssign, state, onToggleTool }: Props) {
           const isUnavailable =
             dwarf.status === "expedition" ||
             dwarf.status === "resting" ||
-            dwarf.status === "forging";
+            dwarf.status === "forging_Tool" ||
+            dwarf.status === "forging_Weapon";
           const specialty = dwarf.specialty
             ? `Skilled in ${jobLabel(dwarf.specialty)}`
             : "Generalist";

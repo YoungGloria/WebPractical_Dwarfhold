@@ -1,6 +1,12 @@
-import type { ColonyState, JobType, ResourceKey } from "./types";
+import type { ColonyState, Dwarf, JobType, ResourceKey } from "./types";
 import { jobLabel } from "./simulation";
 import { log } from "./stateUtils";
+
+const isBusy = (dwarf: Dwarf) =>
+  dwarf.status === "expedition" ||
+  dwarf.status === "resting" ||
+  dwarf.status === "forging_Tool" ||
+  dwarf.status === "forging_Weapon";
 
 export function assignJob(
   state: ColonyState,
@@ -8,14 +14,7 @@ export function assignJob(
   job: JobType,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === id);
-  if (
-    !dwarf ||
-    dwarf.status === "expedition" ||
-    dwarf.status === "resting" ||
-    dwarf.status === "forging_Tool" ||
-    dwarf.status === "forging_Weapon"
-  )
-    return state;
+  if (!dwarf || isBusy(dwarf)) return state;
 
   const dwarves = state.dwarves.map((d) =>
     d.id === id
@@ -38,13 +37,7 @@ export function craftToolAction(
   dwarfId: string,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
-  if (
-    !dwarf?.specialty ||
-    dwarf.status === "expedition" ||
-    dwarf.status === "resting" ||
-    dwarf.status === "forging_Tool" ||
-    dwarf.status === "forging_Weapon")
-    return state;
+  if (!dwarf?.specialty || isBusy(dwarf)) return state;
 
   if (state.resources.wood < 3 || state.resources.stone < 2) {
     return state;
@@ -95,14 +88,7 @@ export function craftWeaponAction(
   dwarfId: string,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
-  if (
-    !dwarf?.specialty ||
-    dwarf.status === "expedition" ||
-    dwarf.status === "resting" ||
-    dwarf.status === "forging_Tool" ||
-    dwarf.status === "forging_Weapon"
-  )
-    return state;
+  if (!dwarf?.specialty || isBusy(dwarf)) return state;
 
   if (state.resources.wood < 4 || state.resources.stone < 3) {
     return state;
@@ -158,8 +144,7 @@ export function startExpeditionAction(
   destination: string,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
-  if (!dwarf || dwarf?.status === "expedition" || dwarf?.status === "forging_Tool" || dwarf?.status === "forging_Weapon" || dwarf?.status === "resting") return state; // Dwarf not found or already on an expedition
-
+  if (!dwarf || isBusy(dwarf)) return state; // unknown, travelling, resting or forging
   const dwarves = state.dwarves.map((d) =>
     d.id === dwarfId ? { ...d, status: "expedition" as const } : d,
   );
@@ -215,6 +200,11 @@ export function toggleToolAction(
   toolEquipped: boolean,
   message: string,
 ): ColonyState {
+  const dwarf = state.dwarves.find((d) => d.id === dwarfId);
+  if (!dwarf) return state; // unknown dwarf
+  if (dwarf.hasTool !== toolEquipped) return state; // flag does not match current state
+  if (!toolEquipped && state.resources.tools <= 0) return state; // no spare tool in inventory
+
   const newState = {
     ...state,
     resources: {

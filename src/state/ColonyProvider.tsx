@@ -171,13 +171,12 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
         prev === nextSecondsLeft ? prev : nextSecondsLeft,
       );
 
-      
       const completedThisTick: CompletedTask[] = [];
       let nextColony = dayAdvanced
         ? advanceDay(colonyRef.current)
         : colonyRef.current;
 
-        nextColony = advanceDwarfCountdowns(nextColony, (task) => {
+      nextColony = advanceDwarfCountdowns(nextColony, (task) => {
         completedThisTick.push(task);
       });
 
@@ -228,7 +227,6 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       // Update the snapshot every tick to ensure the elapsed time is saved
       saveSnapshot(snapshot(), undefined, "replaceHead");
     }, TICK_MS);
-    
 
     return () => window.clearInterval(timer);
   }, [paused]);
