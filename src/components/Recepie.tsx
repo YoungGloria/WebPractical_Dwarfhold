@@ -27,7 +27,8 @@ export function Recepie({
       Boolean(dwarf.specialty) &&
       dwarf.status !== "expedition" &&
       dwarf.status !== "resting" &&
-      dwarf.status !== "forging",
+      dwarf.status !== "forging_Tool" &&
+      dwarf.status !== "forging_Weapon",
   );
 
   useEffect(() => {

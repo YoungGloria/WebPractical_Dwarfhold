@@ -1,7 +1,7 @@
 export type ResourceKey = "wood" | "stone" | "food" | "tools";
 export type JobType = "woodcutting" | "mining" | "farming" | null;
 export type DwarfStatus =
-  "idle" | "working" | "expedition" | "resting" | "forging";
+  "idle" | "working" | "expedition" | "resting" | "forging_Tool" | "forging_Weapon";
 export interface Resources {
   wood: number;
   stone: number;
@@ -19,6 +19,7 @@ export interface Dwarf {
   status: DwarfStatus;
   specialty?: Exclude<JobType, null>;
   hasTool: boolean;
+  countdown?: number; // remaining countdown time, currently used in forging and expedition
 }
 
 export interface ColonyState {
