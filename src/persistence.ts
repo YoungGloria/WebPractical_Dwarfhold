@@ -9,7 +9,12 @@ import type {
   JobType,
   Resources,
 } from "./types";
-import { DAY_MS, EXPEDITION_SECONDS, FORGE_TOOL_SECONDS, FORGE_WEAPON_SECONDS } from "./simulation";
+import {
+  DAY_MS,
+  EXPEDITION_SECONDS,
+  FORGE_TOOL_SECONDS,
+  FORGE_WEAPON_SECONDS,
+} from "./simulation";
 
 export const SAVE_KEY = "dwarfhold.saves";
 export const SAVE_VERSION = 1;
@@ -111,7 +116,17 @@ function parseResources(raw: unknown): Resources | null {
 
 function parseDwarf(raw: unknown): Dwarf | null {
   if (!isRecord(raw)) return null;
-  const { id, name, title, icon, assignment, status, specialty, hasTool, countdown } = raw;
+  const {
+    id,
+    name,
+    title,
+    icon,
+    assignment,
+    status,
+    specialty,
+    hasTool,
+    countdown,
+  } = raw;
 
   if (
     typeof id !== "string" ||
@@ -258,12 +273,20 @@ function reconcile(
 
   for (const dwarf of colony.dwarves) {
     if (dwarf.status === "forging_Weapon") {
-      next = withCountdown(next, dwarf.id, dwarf.countdown ?? FORGE_WEAPON_SECONDS);
+      next = withCountdown(
+        next,
+        dwarf.id,
+        dwarf.countdown ?? FORGE_WEAPON_SECONDS,
+      );
       continue;
     }
 
-     if (dwarf.status === "forging_Tool") {
-      next = withCountdown(next, dwarf.id, dwarf.countdown ?? FORGE_TOOL_SECONDS);
+    if (dwarf.status === "forging_Tool") {
+      next = withCountdown(
+        next,
+        dwarf.id,
+        dwarf.countdown ?? FORGE_TOOL_SECONDS,
+      );
       continue;
     }
 
