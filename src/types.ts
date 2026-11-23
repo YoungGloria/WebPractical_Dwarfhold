@@ -1,5 +1,6 @@
 export type ResourceKey = "wood" | "stone" | "food" | "tools";
 export type JobType = "woodcutting" | "mining" | "farming" | null;
+export type DwarfSpecies = "dwarf" | "knight";
 export type DwarfStatus =
   | "idle"
   | "working"
@@ -16,6 +17,7 @@ export interface Resources {
 }
 
 export interface Dwarf {
+  species: DwarfSpecies;
   id: string;
   name: string;
   title: string;
@@ -33,6 +35,7 @@ export interface ColonyState {
   dwarves: Dwarf[];
   log: Activity[];
   logSeq: number;
+  sirOneUperJoined: boolean;
 }
 
 export interface ExpeditionResult {

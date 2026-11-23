@@ -13,6 +13,7 @@ export function createInitialState(): ColonyState {
     dwarves: [
       {
         id: "dwarf-1",
+        species: "dwarf",
         name: "Bromli Copperkeg",
         title: "Hold Warden",
         icon: "🧔🏻",
@@ -23,6 +24,7 @@ export function createInitialState(): ColonyState {
       },
       {
         id: "dwarf-2",
+        species: "dwarf",
         name: "Yrsa Flintbraid",
         title: "Trail Scout",
         icon: "🧔🏼‍♀️",
@@ -33,6 +35,7 @@ export function createInitialState(): ColonyState {
       },
       {
         id: "dwarf-3",
+        species: "dwarf",
         name: "Dori Ashmantle",
         title: "Stone Singer",
         icon: "🧔🏽",
@@ -40,8 +43,19 @@ export function createInitialState(): ColonyState {
         status: "idle",
         hasTool: false,
       },
+      {
+        id: "sir-one-uper",
+        species: "knight",
+        name: "Sir One Uper",
+        title: "Produces 1 extra",
+        icon: "🤴",
+        assignment: null,
+        status: "idle",
+        hasTool: false,
+      },
     ],
     log: [],
     logSeq: 0,
+    sirOneUperJoined: true,
   };
 }
