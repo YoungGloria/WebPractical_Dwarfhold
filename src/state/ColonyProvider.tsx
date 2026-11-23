@@ -130,6 +130,13 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
               destination: pending.destination,
               requestId: pending.requestId,
             });
+          } else {
+            onComplete({
+              kind: "expedition",
+              dwarfId: dwarf.id,
+              destination: "unknown",
+              requestId: "",
+            });
           }
         }
       }
@@ -164,9 +171,34 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
         prev === nextSecondsLeft ? prev : nextSecondsLeft,
       );
 
+      
       const completedThisTick: CompletedTask[] = [];
+      let nextColony = dayAdvanced
+        ? advanceDay(colonyRef.current)
+        : colonyRef.current;
 
-      setColony((current) => {
+        nextColony = advanceDwarfCountdowns(nextColony, (task) => {
+        completedThisTick.push(task);
+      });
+
+      for (const task of completedThisTick) {
+        if (task.kind === "tool") {
+          nextColony = completeCraftToolAction(nextColony, task.dwarfId);
+        } else if (task.kind === "weapon") {
+          nextColony = completeCraftWeaponAction(nextColony, task.dwarfId);
+        }
+      }
+
+      colonyRef.current = nextColony;
+      setColony(nextColony);
+
+      for (const task of completedThisTick) {
+        if (task.kind === "expedition") {
+          void runExpedition(task.dwarfId, task.destination, task.requestId);
+        }
+      }
+
+      /*setColony((current) => {
         let next: ColonyState = dayAdvanced ? advanceDay(current) : current;
         completedThisTick.length = 0;
 
@@ -191,10 +223,12 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
           void runExpedition(task.dwarfId, task.destination, task.requestId); // handoff to async function to handle expedition completion
         }
       }
+        */
 
       // Update the snapshot every tick to ensure the elapsed time is saved
       saveSnapshot(snapshot(), undefined, "replaceHead");
     }, TICK_MS);
+    
 
     return () => window.clearInterval(timer);
   }, [paused]);
