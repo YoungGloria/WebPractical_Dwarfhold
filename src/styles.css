@@ -473,3 +473,11 @@ footer {
   width: 30%;
   z-index: 10;
 }
+
+.popup-close {
+  background: transparent;
+  color: #b9a589;
+  border: 1px solid #554634;
+  padding: 5px 10px;
+  cursor: pointer;
+}
