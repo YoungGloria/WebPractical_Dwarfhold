@@ -97,22 +97,29 @@ const asArray = (value: unknown): unknown[] | null =>
 
 function parseResources(raw: unknown): Resources | null {
   if (!isRecord(raw)) return null;
-  const { wood, stone, food, tools } = raw;
-  if (!isCount(wood) || !isCount(stone) || !isCount(food) || !isCount(tools)) {
+  const { wood, stone, food, tools, weapons } = raw;
+  if (
+    !isCount(wood) ||
+    !isCount(stone) ||
+    !isCount(food) ||
+    !isCount(tools) ||
+    !isCount(weapons)
+  ) {
     return null;
   }
-  return { wood, stone, food, tools };
+  return { wood, stone, food, tools, weapons };
 }
 
 function parseDwarf(raw: unknown): Dwarf | null {
   if (!isRecord(raw)) return null;
-  const { id, name, title, icon, assignment, status, specialty } = raw;
+  const { id, name, title, icon, assignment, status, specialty, hasTool } = raw;
 
   if (
     typeof id !== "string" ||
     typeof name !== "string" ||
     typeof title !== "string" ||
-    typeof icon !== "string"
+    typeof icon !== "string" ||
+    typeof hasTool !== "boolean"
   ) {
     return null;
   }
@@ -123,6 +130,7 @@ function parseDwarf(raw: unknown): Dwarf | null {
   return {
     id,
     name,
+    hasTool,
     title,
     icon,
     assignment,

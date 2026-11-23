@@ -100,7 +100,7 @@ small {
 }
 .resource-bar {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   margin: 16px 0;
   border: 1px solid #4e3d2a;
   background: #1b1712;
@@ -276,8 +276,16 @@ small {
 }
 .forge {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 18px;
   padding: 17px;
+}
+
+.forge-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
 }
 .forge h2 {
   margin: 2px 0;

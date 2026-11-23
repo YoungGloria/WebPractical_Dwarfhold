@@ -5,7 +5,7 @@ describe("colony simulation", () => {
   it("produces assigned resources and feeds the company", () => {
     const state: ColonyState = {
       day: 1,
-      resources: { wood: 0, stone: 0, food: 5, tools: 0 },
+      resources: { wood: 0, stone: 0, food: 5, tools: 0, weapons: 0 },
       dwarves: [
         {
           id: "d1",
@@ -14,6 +14,7 @@ describe("colony simulation", () => {
           icon: "",
           assignment: "woodcutting",
           status: "working",
+          hasTool: false,
         },
       ],
       log: [],

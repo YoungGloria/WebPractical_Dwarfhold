@@ -8,6 +8,7 @@ export function createInitialState(): ColonyState {
       stone: 9,
       food: 18,
       tools: 1,
+      weapons: 0,
     },
     dwarves: [
       {
@@ -18,6 +19,7 @@ export function createInitialState(): ColonyState {
         assignment: "mining",
         status: "working",
         specialty: "mining",
+        hasTool: false,
       },
       {
         id: "dwarf-2",
@@ -27,6 +29,7 @@ export function createInitialState(): ColonyState {
         assignment: "woodcutting",
         status: "working",
         specialty: "woodcutting",
+        hasTool: false,
       },
       {
         id: "dwarf-3",
@@ -35,6 +38,7 @@ export function createInitialState(): ColonyState {
         icon: "🧔🏽",
         assignment: null,
         status: "idle",
+        hasTool: false,
       },
     ],
     log: [],

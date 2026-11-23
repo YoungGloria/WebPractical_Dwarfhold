@@ -8,14 +8,17 @@ import {
   DAY_MS,
   FORGE_SECONDS,
 } from "../simulation";
-import type { JobType } from "../types";
+import type { JobType, Dwarf } from "../types";
 import {
   assignJob,
   completeCraftToolAction,
+  completeCraftWeaponAction,
   completeExpeditionAction,
   craftToolAction,
+  craftWeaponAction,
   failExpeditionAction,
   startExpeditionAction,
+  toggleToolAction,
 } from "../colonyActions";
 import {
   bootstrapColony,
@@ -162,6 +165,19 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     setColony((current) => assignJob(current, id, assignment));
   }
 
+  function toggleTool(dwarf: Dwarf) {
+    setColony((current) =>
+      toggleToolAction(
+        current,
+        dwarf.id,
+        dwarf.hasTool,
+        dwarf.hasTool
+          ? `${dwarf.name} put the tool back into storage.`
+          : `${dwarf.name} equipped a tool.`,
+      ),
+    );
+  }
+
   function startCraftTimer(dwarfId: string, startSeconds: number) {
     if (craftTimers.current.has(dwarfId)) return;
 
@@ -209,6 +225,47 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       [dwarfId]: FORGE_SECONDS,
     }));
     startCraftTimer(dwarfId, FORGE_SECONDS);
+  }
+
+  function craftWeapon(dwarfId: string) {
+    const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
+    if (
+      !dwarf?.specialty ||
+      (dwarf.status !== "working" && dwarf.status !== "idle")
+    )
+      return;
+    if (
+      colony.resources.wood < 4 ||
+      colony.resources.stone < 3 ||
+      craftTimers.current.has(dwarfId)
+    )
+      return;
+
+    setColony((current) => craftWeaponAction(current, dwarfId));
+    setCraftCountdowns((current) => ({ ...current, [dwarfId]: 5 }));
+
+    let remaining = 5;
+    const timer = window.setInterval(() => {
+      if (pausedRef.current) return;
+
+      remaining -= 1;
+      if (remaining <= 0) {
+        window.clearInterval(timer);
+        craftTimers.current.delete(dwarfId);
+        setCraftCountdowns((current) => {
+          const next = { ...current };
+          delete next[dwarfId];
+          return next;
+        });
+        setColony((current) => completeCraftWeaponAction(current, dwarfId));
+        return;
+      }
+      setCraftCountdowns((current) => ({
+        ...current,
+        [dwarfId]: remaining,
+      }));
+    }, 1_000);
+    craftTimers.current.set(dwarfId, timer);
   }
 
   function startExpeditionTimer(
@@ -339,7 +396,9 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     togglePaused: () => setPaused((value) => !value),
     assignDwarf,
     craftTool,
+    craftWeapon,
     sendExpedition,
+    toggleTool,
   };
 
   return <ColonyContext value={value}>{children}</ColonyContext>;
