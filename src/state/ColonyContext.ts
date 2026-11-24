@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { Activity, ColonyState, Dwarf, JobType } from "../types";
+import type { Activity, ColonyState, Dwarf, JobType } from "../domain/types";
 import { DayPhase } from "../simulation";
 import type { RestoreNotice } from "../persistence";
 

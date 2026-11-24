@@ -49,9 +49,9 @@ import {
   failExpeditionAction,
   startExpeditionAction,
   toggleToolAction,
-} from "./colonyActions";
-import { advanceDay, isProducing } from "./simulation";
-import { createInitialState } from "./initialState";
+} from "../../colonyActions";
+import { advanceDay, isProducing } from "../../simulation";
+import { createInitialState } from "../../domain/initialState";
 import {
   bootstrapColony,
   loadSnapshot,
@@ -60,13 +60,21 @@ import {
   validateSnapshot,
   type Snapshot,
   type StorageLike,
-} from "./persistence";
-import { DwarfRoster } from "./components/DwarfRoster";
-import { Recepie } from "./components/Recepie";
-import { ColonyPage } from "./pages/ColonyPage";
-import { ColonyContext, type ColonyContextValue } from "./state/ColonyContext";
-import type { ColonyState, Dwarf, DwarfStatus, JobType } from "./types";
-import { isFamine } from "./utils";
+} from "../../persistence";
+import { DwarfRoster } from "../../components/DwarfRoster";
+import { Recepie } from "../../components/Recepie";
+import { ColonyPage } from "../../pages/ColonyPage";
+import {
+  ColonyContext,
+  type ColonyContextValue,
+} from "../../state/ColonyContext";
+import type {
+  ColonyState,
+  Dwarf,
+  DwarfStatus,
+  JobType,
+} from "../../domain/types";
+import { isFamine } from "../../utils";
 
 const KNIGHT_ID = "sir-one-uper";
 

@@ -47,8 +47,8 @@
 import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { Popup } from "./components/Popup";
-import { createInitialState } from "./initialState";
+import { Popup } from "../../components/Popup";
+import { createInitialState } from "../../domain/initialState";
 import {
   bootstrapColony,
   clearColonySave,
@@ -60,14 +60,14 @@ import {
   validateSnapshot,
   type Snapshot,
   type StorageLike,
-} from "./persistence";
+} from "../../persistence";
 import {
   DAY_MS,
   EXPEDITION_SECONDS,
   FORGE_TOOL_SECONDS,
   FORGE_WEAPON_SECONDS,
-} from "./simulation";
-import type { ColonyState, Dwarf } from "./types";
+} from "../../simulation";
+import type { ColonyState, Dwarf } from "../../domain/types";
 
 class MemoryStorage implements StorageLike {
   data = new Map<string, string>();

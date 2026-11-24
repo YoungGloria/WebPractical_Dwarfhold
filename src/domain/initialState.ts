@@ -1,4 +1,4 @@
-import type { ColonyState } from "./types.ts";
+import type { ColonyState } from "./types.js";
 
 export function createInitialState(): ColonyState {
   return {

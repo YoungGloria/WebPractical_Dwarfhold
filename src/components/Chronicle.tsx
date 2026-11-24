@@ -1,4 +1,4 @@
-import type { Activity } from "../types";
+import type { Activity } from "../domain/types";
 
 export function Chronicle({ activities }: { activities: Activity[] }) {
   return (

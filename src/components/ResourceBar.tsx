@@ -1,4 +1,4 @@
-import type { Resources } from "../types";
+import type { Resources } from "../domain/types";
 
 const details = {
   wood: ["🪵", "Timber"],

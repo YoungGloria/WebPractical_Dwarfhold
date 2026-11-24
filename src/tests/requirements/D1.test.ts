@@ -55,12 +55,20 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
-import { assignJob } from "./colonyActions";
-import { advanceDay, isProducing, production } from "./simulation";
-import { Layout } from "./pages/Layout";
-import { ColonyContext, type ColonyContextValue } from "./state/ColonyContext";
-import type { ColonyState, Dwarf, DwarfStatus, JobType } from "./types";
-import { isFamine } from "./utils";
+import { assignJob } from "../../colonyActions";
+import { advanceDay, isProducing, production } from "../../simulation";
+import { Layout } from "../../pages/Layout";
+import {
+  ColonyContext,
+  type ColonyContextValue,
+} from "../../state/ColonyContext";
+import type {
+  ColonyState,
+  Dwarf,
+  DwarfStatus,
+  JobType,
+} from "../../domain/types";
+import { isFamine } from "../../utils";
 
 const UNAVAILABLE: DwarfStatus[] = [
   "expedition",

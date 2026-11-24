@@ -1,5 +1,5 @@
 import { failExpeditionAction } from "./colonyActions";
-import { createInitialState } from "./initialState";
+import { createInitialState } from "./domain/initialState";
 import { log, MAX_LOG } from "./stateUtils";
 import type {
   Activity,
@@ -9,7 +9,7 @@ import type {
   DwarfSpecies,
   JobType,
   Resources,
-} from "./types";
+} from "./domain/types";
 import {
   DAY_MS,
   EXPEDITION_SECONDS,

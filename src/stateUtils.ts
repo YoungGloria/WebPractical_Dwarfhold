@@ -1,4 +1,4 @@
-import type { Activity, ColonyState } from "./types";
+import type { Activity, ColonyState } from "./domain/types";
 
 export const MAX_LOG = 8;
 

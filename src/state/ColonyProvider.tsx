@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { beginExpedition } from "../api";
+import { beginExpedition } from "../services/expeditionApi";
 import {
   advanceDay,
   DayPhase,
@@ -9,7 +9,7 @@ import {
   FORGE_TOOL_SECONDS,
   FORGE_WEAPON_SECONDS,
 } from "../simulation";
-import type { JobType, Dwarf, ColonyState } from "../types";
+import type { JobType, Dwarf, ColonyState } from "../domain/types";
 import {
   assignJob,
   completeCraftWeaponAction,

@@ -49,16 +49,21 @@
  * state transitions, server behaviour and client behaviour.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { beginExpedition, RetryableError } from "./api";
+import { beginExpedition, RetryableError } from "../../services/expeditionApi";
 import {
   assignJob,
   completeExpeditionAction,
   craftToolAction,
   failExpeditionAction,
   startExpeditionAction,
-} from "./colonyActions";
-import { advanceDay } from "./simulation";
-import type { ColonyState, Dwarf, DwarfStatus, JobType } from "./types";
+} from "../../colonyActions";
+import { advanceDay } from "../../simulation";
+import type {
+  ColonyState,
+  Dwarf,
+  DwarfStatus,
+  JobType,
+} from "../../domain/types";
 
 type FetchMock = ReturnType<typeof vi.fn<typeof fetch>>;
 

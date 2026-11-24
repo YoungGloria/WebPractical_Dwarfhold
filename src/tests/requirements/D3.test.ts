@@ -48,14 +48,19 @@ import {
   completeCraftWeaponAction,
   craftToolAction,
   craftWeaponAction,
-} from "./colonyActions";
+} from "../../colonyActions";
 import {
   advanceDay,
   FORGE_TOOL_SECONDS,
   FORGE_WEAPON_SECONDS,
-} from "./simulation";
-import { Recepie } from "./components/Recepie";
-import type { ColonyState, Dwarf, DwarfStatus, JobType } from "./types";
+} from "../../simulation";
+import { Recepie } from "../../components/Recepie";
+import type {
+  ColonyState,
+  Dwarf,
+  DwarfStatus,
+  JobType,
+} from "../../domain/types";
 
 function makeDwarf(
   id: string,

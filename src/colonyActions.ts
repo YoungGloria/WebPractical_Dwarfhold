@@ -1,4 +1,4 @@
-import type { ColonyState, Dwarf, JobType, ResourceKey } from "./types";
+import type { ColonyState, Dwarf, JobType, ResourceKey } from "./domain/types";
 import { jobLabel } from "./simulation";
 import { log } from "./stateUtils";
 

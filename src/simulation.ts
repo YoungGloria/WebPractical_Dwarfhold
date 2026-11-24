@@ -1,4 +1,4 @@
-import type { ColonyState, Dwarf, JobType, Resources } from "./types";
+import type { ColonyState, Dwarf, JobType, Resources } from "./domain/types";
 import { isFamine } from "./utils";
 import { log } from "./stateUtils";
 

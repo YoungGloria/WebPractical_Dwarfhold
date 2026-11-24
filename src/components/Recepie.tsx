@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ColonyState, Recepies } from "../types";
+import { ColonyState, Recepies } from "../domain/types";
 
 interface RecepieProps {
   colony: ColonyState;

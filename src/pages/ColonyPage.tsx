@@ -3,7 +3,7 @@ import { Chronicle } from "../components/Chronicle";
 import { DwarfRoster } from "../components/DwarfRoster";
 import { jobLabel, production, isProducing } from "../simulation";
 import { useColony } from "../state/ColonyContext";
-import type { ResourceKey } from "../types";
+import type { ResourceKey } from "../domain/types";
 import { isFamine } from "../utils";
 
 export function ColonyPage() {

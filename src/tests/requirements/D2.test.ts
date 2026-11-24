@@ -55,13 +55,21 @@ import {
   craftToolAction,
   craftWeaponAction,
   toggleToolAction,
-} from "./colonyActions";
-import { advanceDay, FORGE_WEAPON_SECONDS } from "./simulation";
-import { DwarfRoster } from "./components/DwarfRoster";
-import { ResourceBar } from "./components/ResourceBar";
-import { ForgePage } from "./pages/ForgePage";
-import { ColonyContext, type ColonyContextValue } from "./state/ColonyContext";
-import type { ColonyState, Dwarf, DwarfStatus, JobType } from "./types";
+} from "../../colonyActions";
+import { advanceDay, FORGE_WEAPON_SECONDS } from "../../simulation";
+import { DwarfRoster } from "../../components/DwarfRoster";
+import { ResourceBar } from "../../components/ResourceBar";
+import { ForgePage } from "../../pages/ForgePage";
+import {
+  ColonyContext,
+  type ColonyContextValue,
+} from "../../state/ColonyContext";
+import type {
+  ColonyState,
+  Dwarf,
+  DwarfStatus,
+  JobType,
+} from "../../domain/types";
 
 function makeDwarf(
   id: string,
