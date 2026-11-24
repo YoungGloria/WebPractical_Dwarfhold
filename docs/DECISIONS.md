@@ -8,21 +8,21 @@ This document describes the **expected game behavior** per requirement (D1–D7)
 
 **Starting State.** Day 12 · Wood 14 · Stone 9 · Food 18 · Tools 1 · Weapons 0.
 
-| Dwarf | Specialty | Starts as |
-|---|---|---|
-| Bromli Copperkeg (Hold Warden) | Mining | Mining |
-| Yrsa Flintbraid (Trail Scout) | Woodcutting | Woodcutting |
-| Dori Ashmantle (Stone Singer) | none (Generalist) | unassigned |
+| Dwarf                          | Specialty         | Starts as   |
+| ------------------------------ | ----------------- | ----------- |
+| Bromli Copperkeg (Hold Warden) | Mining            | Mining      |
+| Yrsa Flintbraid (Trail Scout)  | Woodcutting       | Woodcutting |
+| Dori Ashmantle (Stone Singer)  | none (Generalist) | unassigned  |
 
 **Resident Status** – determines what a resident is currently allowed to do:
 
-| Status | Meaning | Produces? | Reassignable? | Can forge / travel? |
-|---|---|---|---|---|
-| `idle` | without job | no | yes | yes |
-| `working` | has a job | yes | yes | yes |
-| `expedition` | on the road | no | no | no |
-| `forging_Tool` / `forging_Weapon` | forging | no | no | no |
-| `resting` | recovering until the next day change | no | no | no |
+| Status                            | Meaning                              | Produces? | Reassignable? | Can forge / travel? |
+| --------------------------------- | ------------------------------------ | --------- | ------------- | ------------------- |
+| `idle`                            | without job                          | no        | yes           | yes                 |
+| `working`                         | has a job                            | yes       | yes           | yes                 |
+| `expedition`                      | on the road                          | no        | no            | no                  |
+| `forging_Tool` / `forging_Weapon` | forging                              | no        | no            | no                  |
+| `resting`                         | recovering until the next day change | no        | no            | no                  |
 
 A resident is always in exactly **one** status — never productive and traveling or forging at the same time.
 
@@ -34,16 +34,17 @@ A resident is always in exactly **one** status — never productive and travelin
 
 **Work.** Each resident has at most one job. The yield per day is:
 
-| Job | Yield |
-|---|---|
-| Woodcutting | 3 Wood |
-| Mining | 2 Stone |
-| Mushroom Farm | 4 Food |
-| unassigned | nothing |
+| Job           | Yield   |
+| ------------- | ------- |
+| Woodcutting   | 3 Wood  |
+| Mining        | 2 Stone |
+| Mushroom Farm | 4 Food  |
+| unassigned    | nothing |
 
 An assignment takes effect immediately as a status, but only affects production at the next day change. Anyone traveling, resting, or forging cannot be reassigned.
 
 **Day Change – Order.**
+
 1. Check whether a famine is occurring.
 2. Calculate production and meals.
 3. Resting residents become available again (with job → `working`, without → `idle`).
@@ -55,7 +56,7 @@ An assignment takes effect immediately as a status, but only affects production 
 
 **Decision: Consequence of a Famine.**
 
-- **When:** When the food stock *at the start of the day change* is smaller than the number of residents. Only the stock counts; daily production from farmers is not included. Food equal to the number of residents is not yet a famine (example: 3 residents, 3 food → no famine; 2 food → famine).
+- **When:** When the food stock _at the start of the day change_ is smaller than the number of residents. Only the stock counts; daily production from farmers is not included. Food equal to the number of residents is not yet a famine (example: 3 residents, 3 food → no famine; 2 food → famine).
 - **Effect:** Every productive resident produces **1 less** of their resource, down to a minimum of 0. This also affects the Mushroom Farm (4 → 3).
 - **Stacks with other bonuses:** Tool +1, Knight +1, Famine −1 (for example, a knight with a tool in mining: 2 + 1 + 1 − 1 = 3).
 - **No harsh penalties:** Nobody dies or leaves the settlement. Missing food simply disappears (stock stays at 0).
@@ -69,6 +70,7 @@ The Colony page displays "Net food after meals" (green when positive, red when n
 ## D2 – Tools, Weapons, Equipment
 
 **Equipping a Tool.** Using the "Has Tool" checkbox, a resident takes a tool from the shared stockpile. Unchecking returns it.
+
 - At most 1 tool per resident; each tool held by at most one resident.
 - With no tools in the stockpile, the checkbox is disabled.
 - The roster card shows who is carrying a tool.
@@ -78,6 +80,7 @@ The Colony page displays "Net food after meals" (green when positive, red when n
 **Bonus.** A carried tool grants **+1** of the assigned resource per day (Woodcutting 3 → 4, Mining 2 → 3, Mushroom Farm 4 → 5). The bonus applies only while the resident is actually producing. Without a job, on an expedition, while forging, or on a rest day, there is no bonus. Specialties have no effect on production.
 
 **Weapons.**
+
 - **Decision – Cost:** 4 Wood + 3 Stone, 7 seconds forge time (tool for comparison: 3 Wood + 2 Stone, 5 seconds).
 - Weapons are a **colony resource** ("Weapons" in the resource bar). They are not given to residents and grant no production bonus.
 - Weapons are not consumed over the course of a day. Their sole purpose is repelling a raid (see D7).
@@ -88,7 +91,7 @@ The Colony page displays "Net food after meals" (green when positive, red when n
 
 Forging requires **materials, an eligible smith, and time**. There is no instant forging.
 
-- **Materials:** Deducted at *start* (not upon completion). An exact match is enough; one unit less is not. There is no cancellation with a refund.
+- **Materials:** Deducted at _start_ (not upon completion). An exact match is enough; one unit less is not. There is no cancellation with a refund.
 - **Eligible Smith:** Only a dwarf with a **specialty** who is not currently busy. Generalists (at start: Dori) and the knight cannot forge.
 - **While Forging:** The smith is busy: produces nothing, cannot be reassigned, and cannot go on an expedition. They continue to eat. Multiple smiths can work simultaneously.
 - **Completion:** The result (+1 tool or +1 weapon in the stockpile) is created once. Afterward, the smith rests until the next day change.
@@ -102,6 +105,7 @@ Forging requires **materials, an eligible smith, and time**. There is no instant
 **Who Can Travel:** Any resident who is not currently busy (even without a job). Not the knight.
 
 **Expedition Flow (Two Phases).**
+
 1. **Travel:** 5-second countdown. The dwarf is `expedition`: produces nothing, cannot be reassigned, cannot forge, continues to eat. Everyone else continues working normally.
 2. **Request:** After the countdown, the request goes to the server (standard response time 2 seconds). The dwarf remains away until the response arrives.
 
@@ -117,11 +121,11 @@ A dwarf can only have one expedition at a time. A second click is ignored.
 
 **Destinations.**
 
-| Destination | Outcome |
-|---|---|
-| Crystal Cave | 8 Stone + 1 Tool · brings the knight (D6) |
-| The Old Mine | 12 Stone + 2 Wood |
-| Blocked Pass | always fails (rockslide) |
+| Destination              | Outcome                                                     |
+| ------------------------ | ----------------------------------------------------------- |
+| Crystal Cave             | 8 Stone + 1 Tool · brings the knight (D6)                   |
+| The Old Mine             | 12 Stone + 2 Wood                                           |
+| Blocked Pass             | always fails (rockslide)                                    |
 | Abandoned Fortifications | 4 Stone + 3 Wood + 1 Tool + 1 Weapon · triggers a raid (D7) |
 
 ---
@@ -133,6 +137,7 @@ A dwarf can only have one expedition at a time. A second click is ignored.
 **When:** Automatically after every change and every second. A new save is created for each completed day. The last 5 saves are kept. Unchanged states are not saved twice.
 
 **After Reloading:**
+
 - The game starts **paused** ("Wake the hold"). A popup explains what happened.
 - Latest save readable → "Latest save restored – No progress was lost".
 - Latest save corrupted, older one readable → "Older save restored – Some progress was lost".
@@ -141,15 +146,15 @@ A dwarf can only have one expedition at a time. A second click is ignored.
 
 **Decision – Interrupted Tasks:**
 
-| Task on Reload | Behavior |
-|---|---|
-| Forging | continues after waking up with remaining time |
-| Expedition with saved request | continues with remaining time; request is re-sent with the same ID |
+| Task on Reload                   | Behavior                                                                            |
+| -------------------------------- | ----------------------------------------------------------------------------------- |
+| Forging                          | continues after waking up with remaining time                                       |
+| Expedition with saved request    | continues with remaining time; request is re-sent with the same ID                  |
 | Expedition without saved request | treated as lost: dwarf rests, no reward, warning "lost its trail during the reload" |
 
 Every interrupted task is mentioned in the chronicle.
 
-**Not Saved:** Popup messages (e.g., the raid popup) and the pause state. However, the event itself remains in the chronicle as long as it is among the last 8 entries. 
+**Not Saved:** Popup messages (e.g., the raid popup) and the pause state. However, the event itself remains in the chronicle as long as it is among the last 8 entries.
 ---
 
 ## D6 – A New Species: Sir One Uper (Knight)
@@ -157,6 +162,7 @@ Every interrupted task is mentioned in the chronicle.
 **Identity.** A knight with 🤴, title "Produces 1 extra". The roster card displays "Knight (+1 basic yield)" instead of a specialty or "Generalist".
 
 **Joining.**
+
 - Arrives after the **first successful expedition to Crystal Cave**. Failures do not count, nor do other destinations.
 - Arrives **once**, not a second time even after reloading.
 - Arrives idle, without a job and without a tool.
@@ -176,25 +182,28 @@ Every interrupted task is mentioned in the chronicle.
 **The Destination.** "Abandoned Fortifications" rewards (4 Stone, 3 Wood, 1 Tool, 1 Weapon). However, the scout is **tracked**: after returning, an enemy attacks the colony.
 
 **When Does the Raid Happen?**
+
 - **Only after a successful completion** of the expedition — **once** per expedition.
 - **Never on failure.** Even "Blocked Pass" (which always fails) never triggers a raid. The same applies to forced server errors.
 - **Never on duplicate delivery** of the same success message.
 - Crystal Cave and Old Mine do not trigger a raid.
 
 **Order of Events.** First, rewards are credited, the dwarf rests, and the chronicle reports the find. **After that**, the enemy attacks. Two consequences follow from this:
+
 1. The weapon just found **counts toward defense**.
 2. The raw materials just found **can be looted as well**.
 
 **Decision – Weapon Threshold: 3 Weapons.**
 
-| Weapons in Stockpile (incl. found) | Result |
-|---|---|
-| 3 or more | The colony repels the attack |
-| 0 to 2 | The enemies loot |
+| Weapons in Stockpile (incl. found) | Result                       |
+| ---------------------------------- | ---------------------------- |
+| 3 or more                          | The colony repels the attack |
+| 0 to 2                             | The enemies loot             |
 
 **Decision – Defense Consumes Weapons.** On a successful defense, exactly **3 weapons are consumed** ("too dull to use again"). Excess weapons remain (for example, 4 → 1, 7 → 4). Nothing is looted.
 
 **Decision – Looting (Deterministic, No Randomness).** With too few weapons:
+
 - **All weapons are lost** (even 1 or 2; they weren't enough).
 - **Wood, Stone, Food, and Tools in the stockpile are halved.** Rounded to the nearest whole number, with .5 rounded up. So the colony keeps the larger half (9 → 5, 1 → 1, 0 → 0).
 - Carried tools, all residents, the knight, and the day remain untouched.
@@ -203,11 +212,11 @@ The same state always leads to the same result.
 
 **Visibility.**
 
-| Location | Defense | Looting |
-|---|---|---|
+| Location                  | Defense                                         | Looting                                                                                                                              |
+| ------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | Popup (with Close button) | "The Raid was defeated!" · weapons are consumed | "You have been raided!" · half of the resources were stolen; text states whether no weapons were available or they were insufficient |
-| Chronicle | green entry | warning entry |
-| Resource bar | weapons reduced | weapons set to 0, remaining resources halved |
+| Chronicle                 | green entry                                     | warning entry                                                                                                                        |
+| Resource bar              | weapons reduced                                 | weapons set to 0, remaining resources halved                                                                                         |
 
 Both popups say: "They appear to have followed your scout."
 
