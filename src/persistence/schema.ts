@@ -49,6 +49,7 @@ export interface Snapshot {
   colony: ColonyState;
   dayElapsedMs?: number;
   pendingExpeditions: Record<string, PendingExpedition>;
+  raidNotice?: PopupNotice | null;
 }
 
 export type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -66,6 +67,7 @@ export interface Bootstrap {
   pendingExpeditions: Record<string, PendingExpedition>;
   paused: boolean;
   notice: PopupNotice | null;
+  raidNotice: PopupNotice | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -165,6 +167,19 @@ function parseActivity(raw: unknown): Activity | null {
   return { id, day, message, ...(tone === undefined ? {} : { tone }) };
 }
 
+function parsePopupNotice(raw: unknown): PopupNotice | null {
+  if (!isRecord(raw)) return null;
+  const { header, subHeader, message } = raw;
+  if (
+    typeof header !== "string" ||
+    typeof subHeader !== "string" ||
+    typeof message !== "string"
+  ) {
+    return null;
+  }
+  return { header, subHeader, message };
+}
+
 function parseColony(raw: unknown): ColonyState | null {
   if (!isRecord(raw)) return null;
 
@@ -261,10 +276,17 @@ export function validateSnapshot(raw: unknown): Validation {
   const colony = parseColony(raw.colony);
   const dayElapsedMs = parseDayElapsedMs(raw.dayElapsedMs);
   const pending = parsePending(raw.pendingExpeditions);
+  const raidNotice =
+    raw.raidNotice === undefined || raw.raidNotice === null
+      ? null
+      : parsePopupNotice(raw.raidNotice);
   if (
     !colony ||
     dayElapsedMs === null ||
     !pending ||
+    (raw.raidNotice !== undefined &&
+      raw.raidNotice !== null &&
+      raidNotice === null) ||
     typeof raw.savedAt !== "number"
   ) {
     return { ok: false, reason: "corrupt" };
@@ -276,6 +298,7 @@ export function validateSnapshot(raw: unknown): Validation {
       version: SAVE_VERSION,
       savedAt: raw.savedAt,
       dayElapsedMs,
+      raidNotice,
       ...reconcile(colony, pending),
     },
   };

@@ -19,6 +19,7 @@ import { destinationRecruitsKnight } from "../../config/destinations";
 interface ExpeditionRunnerArgs {
   colony: ColonyState;
   colonyRef: RefObject<ColonyState>;
+  raidNoticeRef: RefObject<PopupNotice | null>;
   setColony: Dispatch<SetStateAction<ColonyState>>;
   setRaidNotice: Dispatch<SetStateAction<PopupNotice | null>>;
   pendingRequests: RefObject<Map<string, PendingExpedition>>;
@@ -28,6 +29,7 @@ interface ExpeditionRunnerArgs {
 export function useExpeditionRunner({
   colony,
   colonyRef,
+  raidNoticeRef,
   setColony,
   setRaidNotice,
   pendingRequests,
@@ -62,6 +64,7 @@ export function useExpeditionRunner({
       if (next !== current && result.raid) {
         const raid = raidAction(next);
         next = raid.colony;
+        raidNoticeRef.current = raid.notice;
         setRaidNotice(raid.notice);
       }
 

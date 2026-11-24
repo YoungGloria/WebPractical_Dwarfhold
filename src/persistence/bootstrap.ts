@@ -16,6 +16,7 @@ export function bootstrapColony(
       pendingExpeditions: {},
       paused: false,
       notice: null,
+      raidNotice: null,
     };
   }
 
@@ -35,6 +36,7 @@ export function bootstrapColony(
         message:
           "No readable save was found, so a new hold was founded. The hold is resting until you wake it.",
       },
+      raidNotice: null,
     };
   }
 
@@ -72,6 +74,7 @@ export function bootstrapColony(
     ),
     pendingExpeditions: snapshot.pendingExpeditions,
     paused: true,
+    raidNotice: snapshot.raidNotice ?? null,
     notice:
       skipped === 0
         ? {

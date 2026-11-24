@@ -1,12 +1,13 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { SAVE_VERSION } from "../../config/constants";
-import type { ColonyState } from "../../domain/types";
+import type { ColonyState, PopupNotice } from "../../domain/types";
 import { saveSnapshot } from "../../persistence/ring";
 import type { PendingExpedition } from "../../persistence/schema";
 
 interface AutosaveArgs {
   colony: ColonyState;
   colonyRef: RefObject<ColonyState>;
+  raidNoticeRef: RefObject<PopupNotice | null>;
   elapsedMsRef: RefObject<number>;
   pendingRequestsRef: RefObject<Map<string, PendingExpedition>>;
 }
@@ -14,6 +15,7 @@ interface AutosaveArgs {
 export function useAutosave({
   colony,
   colonyRef,
+  raidNoticeRef,
   elapsedMsRef,
   pendingRequestsRef,
 }: AutosaveArgs): {
@@ -28,6 +30,7 @@ export function useAutosave({
     colony: colonyRef.current,
     dayElapsedMs: elapsedMsRef.current,
     pendingExpeditions: Object.fromEntries(pendingRequestsRef.current),
+    raidNotice: raidNoticeRef.current,
   });
 
   const saveDuringDay = () => {

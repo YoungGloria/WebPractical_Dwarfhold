@@ -17,10 +17,13 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   const [colony, setColony] = useState(boot.colony);
   const [paused, setPaused] = useState(boot.paused);
   const [restoreNotice, setRestoreNotice] = useState(boot.notice);
-  const [raidNotice, setRaidNotice] = useState<PopupNotice | null>(null);
+  const [raidNotice, setRaidNotice] = useState<PopupNotice | null>(
+    boot.raidNotice,
+  );
 
   const colonyRef = useRef(colony);
   colonyRef.current = colony;
+  const raidNoticeRef = useRef(raidNotice);
   const elapsedMsRef = useRef(boot.dayElapsedMs);
   const pendingRequests = useRef(
     new Map<string, PendingExpedition>(Object.entries(boot.pendingExpeditions)),
@@ -29,6 +32,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   const autosave = useAutosave({
     colony,
     colonyRef,
+    raidNoticeRef,
     elapsedMsRef,
     pendingRequestsRef: pendingRequests,
   });
@@ -36,6 +40,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   const expeditionRunner = useExpeditionRunner({
     colony,
     colonyRef,
+    raidNoticeRef,
     setColony,
     setRaidNotice,
     pendingRequests,
@@ -147,6 +152,12 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     window.location.reload();
   }
 
+  function dismissRaidNotice() {
+    raidNoticeRef.current = null;
+    setRaidNotice(null);
+    autosave.saveDuringDay();
+  }
+
   const value: ColonyContextValue = {
     colony,
     paused,
@@ -157,7 +168,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     restoreNotice,
     dismissRestoreNotice: () => setRestoreNotice(null),
     raidNotice,
-    dismissRaidNotice: () => setRaidNotice(null),
+    dismissRaidNotice,
     newGame,
     togglePaused: () => setPaused((value) => !value),
     assignDwarf,
