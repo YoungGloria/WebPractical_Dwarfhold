@@ -5,7 +5,7 @@ import type {
   DwarfStatus,
   DwarfSpecies,
   JobType,
-  Resources,
+  Resources, PopupNotice,
 } from "../domain/types";
 import {
   DAY_MS,
@@ -59,19 +59,13 @@ export type LoadResult =
   | { status: "ok"; snapshot: Snapshot; skipped: number }
   | { status: "fallback"; reason: SnapshotProblem };
 
-export interface RestoreNotice {
-  header: string;
-  subHeader: string;
-  message: string;
-}
-
 export interface Bootstrap {
   colony: ColonyState;
   dayElapsedMs: number;
   expeditionCountdowns: Record<string, number>;
   pendingExpeditions: Record<string, PendingExpedition>;
   paused: boolean;
-  notice: RestoreNotice | null;
+  notice: PopupNotice | null;
 }
 
 /* ------------------------------------------------------------------ */
