@@ -64,7 +64,7 @@ import {
 } from "../../persistence/schema";
 import { SAVE_VERSION } from "../../config/constants";
 import { DwarfRoster } from "../../components/DwarfRoster";
-import { Recepie } from "../../components/Recepie";
+import { RecipePanel } from "../../components/forge/RecipePanel";
 import { ColonyPage } from "../../pages/ColonyPage";
 import {
   ColonyContext,
@@ -224,13 +224,10 @@ function renderRoster(colony: ColonyState): string {
 
 function renderForge(colony: ColonyState): string {
   return renderToStaticMarkup(
-    createElement(Recepie, {
+    createElement(RecipePanel, {
       colony,
-      recepieMethod: noop,
-      name: "Craft a tool",
-      subText: "",
-      buttonText: "Forge tool",
-      recepieResources: { wood: 3, stone: 2, output: 1, icon: "⚒️" },
+      recipeId: "tool",
+      onCraft: noop,
     }),
   );
 }

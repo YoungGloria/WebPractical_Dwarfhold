@@ -54,7 +54,7 @@ import {
   FORGE_TOOL_SECONDS,
   FORGE_WEAPON_SECONDS,
 } from "../../config/constants";
-import { Recepie } from "../../components/Recepie";
+import { RecipePanel } from "../../components/forge/RecipePanel";
 import type {
   ColonyState,
   Dwarf,
@@ -114,11 +114,8 @@ const BUSY: DwarfStatus[] = [
 const recipeProps = (colony: ColonyState) =>
   ({
     colony,
-    name: "Craft a tool",
-    subText: "Equip the hold for future work.",
-    buttonText: "Forge tool",
-    recepieResources: { wood: 3, stone: 2, output: 1, icon: "⚒️" as const },
-  }) as ComponentProps<typeof Recepie>;
+    recipeId: "tool" as const,
+  }) as ComponentProps<typeof RecipePanel>;
 
 describe("D3 crafting as colony work", () => {
   describe("materials", () => {
@@ -506,7 +503,7 @@ describe("D3 crafting as colony work", () => {
         specialist("dwarf-1", "forging_Tool", { countdown: 3, name: "Yrsa" }),
       ]);
       const html = renderToStaticMarkup(
-        createElement(Recepie, recipeProps(state)),
+        createElement(RecipePanel, recipeProps(state)),
       );
 
       expect(html).toContain("Yrsa");
@@ -519,29 +516,42 @@ describe("D3 crafting as colony work", () => {
         specialist("dwarf-1", "forging_Weapon", { countdown: 6, name: "Dori" }),
       ]);
       const html = renderToStaticMarkup(
-        createElement(Recepie, recipeProps(state)),
+        createElement(RecipePanel, {
+          colony: state,
+          recipeId: "weapon",
+          onCraft: () => undefined,
+        }),
       );
 
       expect(html).toContain("Dori");
       expect(html).toContain("Ready in: 6s");
     });
 
-    it("shows every crafter when several dwarves are forging", () => {
+    it("shows only the matching crafter in each recipe panel", () => {
       const state = makeState([
         specialist("dwarf-1", "forging_Tool", { countdown: 2, name: "Yrsa" }),
         specialist("dwarf-2", "forging_Weapon", { countdown: 5, name: "Dori" }),
       ]);
-      const html = renderToStaticMarkup(
-        createElement(Recepie, recipeProps(state)),
+      const toolHtml = renderToStaticMarkup(
+        createElement(RecipePanel, recipeProps(state)),
+      );
+      const weaponHtml = renderToStaticMarkup(
+        createElement(RecipePanel, {
+          colony: state,
+          recipeId: "weapon",
+          onCraft: () => undefined,
+        }),
       );
 
-      expect(html).toContain("Yrsa");
-      expect(html).toContain("Dori");
+      expect(toolHtml).toContain("Yrsa");
+      expect(toolHtml).not.toContain("Dori");
+      expect(weaponHtml).toContain("Dori");
+      expect(weaponHtml).not.toContain("Yrsa");
     });
 
     it("shows no progress line when nobody is forging", () => {
       const html = renderToStaticMarkup(
-        createElement(Recepie, recipeProps(makeState())),
+        createElement(RecipePanel, recipeProps(makeState())),
       );
 
       expect(html).not.toContain("is crafting");
@@ -549,7 +559,7 @@ describe("D3 crafting as colony work", () => {
 
     it("disables the forge button until a specialist is selected", () => {
       const html = renderToStaticMarkup(
-        createElement(Recepie, recipeProps(makeState())),
+        createElement(RecipePanel, recipeProps(makeState())),
       );
 
       expect(html).toMatch(/<button[^>]*disabled=""[^>]*>Forge tool/);
@@ -562,7 +572,7 @@ describe("D3 crafting as colony work", () => {
         specialist("dwarf-3", "working", { name: "Bromli" }),
       ]);
       const html = renderToStaticMarkup(
-        createElement(Recepie, recipeProps(state)),
+        createElement(RecipePanel, recipeProps(state)),
       );
       const options = html.match(/<option[^>]*>[^<]*<\/option>/g) ?? [];
 
@@ -576,7 +586,7 @@ describe("D3 crafting as colony work", () => {
         makeDwarf("dwarf-1", null, "idle", { name: "Generalist" }),
       ]);
       const html = renderToStaticMarkup(
-        createElement(Recepie, recipeProps(state)),
+        createElement(RecipePanel, recipeProps(state)),
       );
       const options = (html.match(/<option[^>]*>[^<]*<\/option>/g) ?? []).join(
         "",

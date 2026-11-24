@@ -52,10 +52,3 @@ export interface Activity {
   tone?: "good" | "warning";
 }
 
-export interface Recepies {
-  wood: number;
-  stone: number;
-  output: number;
-  //type: "tool" | "weapon"
-  icon: "⚒️" | "⚔️";
-}

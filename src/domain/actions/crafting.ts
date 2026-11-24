@@ -1,6 +1,7 @@
 import type { ColonyState } from "../types";
 import { log } from "../log";
 import { canForge } from "../rules/availability";
+import { recipes } from "../../config/recipes";
 
 export function craftToolAction(
   state: ColonyState,
@@ -8,15 +9,20 @@ export function craftToolAction(
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
   if (!dwarf || !canForge(dwarf)) return state;
-  if (state.resources.wood < 3 || state.resources.stone < 2) return state;
+  const recipe = recipes.tool;
+  if (
+    state.resources.wood < recipe.wood ||
+    state.resources.stone < recipe.stone
+  )
+    return state;
 
   return log(
     {
       ...state,
       resources: {
         ...state.resources,
-        wood: state.resources.wood - 3,
-        stone: state.resources.stone - 2,
+        wood: state.resources.wood - recipe.wood,
+        stone: state.resources.stone - recipe.stone,
       },
       dwarves: state.dwarves.map((d) =>
         d.id === dwarfId ? { ...d, status: "forging_Tool" as const } : d,
@@ -53,15 +59,20 @@ export function craftWeaponAction(
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
   if (!dwarf || !canForge(dwarf)) return state;
-  if (state.resources.wood < 4 || state.resources.stone < 3) return state;
+  const recipe = recipes.weapon;
+  if (
+    state.resources.wood < recipe.wood ||
+    state.resources.stone < recipe.stone
+  )
+    return state;
 
   return log(
     {
       ...state,
       resources: {
         ...state.resources,
-        wood: state.resources.wood - 4,
-        stone: state.resources.stone - 3,
+        wood: state.resources.wood - recipe.wood,
+        stone: state.resources.stone - recipe.stone,
       },
       dwarves: state.dwarves.map((d) =>
         d.id === dwarfId ? { ...d, status: "forging_Weapon" as const } : d,

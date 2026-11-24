@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
-import { FORGE_TOOL_SECONDS, FORGE_WEAPON_SECONDS } from "../config/constants";
+import { recipes } from "../config/recipes";
 import { assignJob } from "../domain/actions/assignment";
 import { craftToolAction, craftWeaponAction } from "../domain/actions/crafting";
 import { toggleToolAction } from "../domain/actions/equipment";
@@ -90,14 +90,21 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       dwarf.species === "knight"
     )
       return;
-    if (colony.resources.wood < 3 || colony.resources.stone < 2) return;
+    const recipe = recipes.tool;
+    if (
+      colony.resources.wood < recipe.wood ||
+      colony.resources.stone < recipe.stone
+    )
+      return;
 
     setColony((current) => {
       const updated = craftToolAction(current, dwarfId);
       const next = {
         ...updated,
         dwarves: updated.dwarves.map((d) =>
-          d.id === dwarfId ? { ...d, countdown: FORGE_TOOL_SECONDS } : d,
+          d.id === dwarfId
+            ? { ...d, countdown: recipe.durationSeconds }
+            : d,
         ),
       };
       colonyRef.current = next;
@@ -114,14 +121,21 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       dwarf.species === "knight"
     )
       return;
-    if (colony.resources.wood < 4 || colony.resources.stone < 3) return;
+    const recipe = recipes.weapon;
+    if (
+      colony.resources.wood < recipe.wood ||
+      colony.resources.stone < recipe.stone
+    )
+      return;
 
     setColony((current) => {
       const updated = craftWeaponAction(current, dwarfId);
       const next = {
         ...updated,
         dwarves: updated.dwarves.map((d) =>
-          d.id === dwarfId ? { ...d, countdown: FORGE_WEAPON_SECONDS } : d,
+          d.id === dwarfId
+            ? { ...d, countdown: recipe.durationSeconds }
+            : d,
         ),
       };
       colonyRef.current = next;
