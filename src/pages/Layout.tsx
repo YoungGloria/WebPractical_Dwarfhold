@@ -60,20 +60,18 @@ export function Layout() {
       )}
 
       {isFamine(useColony().colony) ? (
-          <Popup
-              header="Famine"
-              subHeader="It has been a long time since they have eaten."
-              message={
-                "Your people are starving. Feed them.\nYour workers output is reduced by 1."
-              }
-          />
+        <Popup
+          header="Famine"
+          subHeader="It has been a long time since they have eaten."
+          message={
+            "Your people are starving. Feed them.\nYour workers output is reduced by 1."
+          }
+        />
       ) : (
-          ""
+        ""
       )}
 
-      {raidNotice && (
-          <Popup {...raidNotice} onClose={dismissRaidNotice} />
-      )}
+      {raidNotice && <Popup {...raidNotice} onClose={dismissRaidNotice} />}
 
       <ResourceBar resources={colony.resources} />
       <Outlet />

@@ -171,17 +171,15 @@ export function ColonyPage() {
               <option value="crystal-cave">Crystal Cave</option>
               <option value="old-mine">The Old Mine</option>
               <option value="blocked-pass">Blocked Pass</option>
-              <option value="abandoned-fortifications">Abandoned Fortifications</option>
+              <option value="abandoned-fortifications">
+                Abandoned Fortifications
+              </option>
             </select>
           </label>
 
           <button
             disabled={blocked}
-            onClick={() =>
-              void sendExpedition(expeditionDwarf, destination).catch((error) =>
-                console.error("Failed to send expedition:", error),
-              )
-            } // onClick expects a function that returns void
+            onClick={() => sendExpedition(expeditionDwarf, destination)} // onClick expects a function that returns void
           >
             {expeditionPending ? "Beyond the gate…" : "Send expedition"}
           </button>

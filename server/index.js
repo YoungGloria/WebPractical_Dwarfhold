@@ -19,7 +19,8 @@ const outcomes = {
   },
   "abandoned-fortifications": {
     rewards: { stone: 4, wood: 3, tools: 1, weapons: 1 },
-    message: "The abandoned fortifications are already looted. But there where some tools and weapons under a collapsed building.",
+    message:
+      "The abandoned fortifications are already looted. But there where some tools and weapons under a collapsed building.",
     raid: true,
   },
 };
