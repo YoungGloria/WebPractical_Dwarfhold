@@ -15,28 +15,25 @@ export function ColonyPage() {
     sendExpedition,
     toggleTool,
   } = useColony();
+  const isEligibleScout = (dwarf: (typeof colony.dwarves)[number]) =>
+    dwarf.species !== "knight" &&
+    dwarf.status !== "expedition" &&
+    dwarf.status !== "resting" &&
+    dwarf.status !== "forging_Tool" &&
+    dwarf.status !== "forging_Weapon";
+
   const [destination, setDestination] = useState("crystal-cave");
   const [expeditionDwarf, setExpeditionDwarf] = useState(
-    () => colony.dwarves.find((d) => d.status !== "expedition")?.id ?? "", // Default to the first available dwarf
-  );
+    () => colony.dwarves.find(isEligibleScout)?.id ?? "",
+  ); // Default to the first eligable scout
 
   // Ensure the selected dwarf is always valid and available - rection to updates in the colony state
   useEffect(() => {
     const current = colony.dwarves.find(
       (dwarf) => dwarf.id === expeditionDwarf,
     );
-    if (
-      !current ||
-      current.status === "expedition" ||
-      current.status === "resting" ||
-      current.status === "forging"
-    ) {
-      const next = colony.dwarves.find(
-        (dwarf) =>
-          dwarf.status !== "expedition" &&
-          dwarf.status !== "resting" &&
-          dwarf.status !== "forging",
-      );
+    if (!current || isEligibleScout(current) === false) {
+      const next = colony.dwarves.find(isEligibleScout);
       if (next) {
         setExpeditionDwarf(next.id);
       }
@@ -44,12 +41,7 @@ export function ColonyPage() {
   }, [colony.dwarves, expeditionDwarf]);
 
   const selected = colony.dwarves.find((d) => d.id === expeditionDwarf);
-  const blocked =
-    !selected ||
-    selected.status === "expedition" ||
-    selected.status === "resting" ||
-    selected.status === "forging" ||
-    expeditionPending;
+  const blocked = !selected || !isEligibleScout(selected) || expeditionPending;
   const awayDwarf = colony.dwarves.find(
     (dwarf) => dwarf.status === "expedition",
   );
@@ -60,6 +52,12 @@ export function ColonyPage() {
         let resourceModifier = 0;
         if (isFamine(colony)) {
           resourceModifier -= 1;
+        }
+        if (dwarf.hasTool) {
+          resourceModifier += 1;
+        }
+        if (dwarf.species === "knight") {
+          resourceModifier += 1;
         }
         // ensure the dwarf has an assignment and is producing (ie not on an expedition)
         const output = production[dwarf.assignment];
@@ -147,18 +145,11 @@ export function ColonyPage() {
               value={expeditionDwarf}
               onChange={(event) => setExpeditionDwarf(event.target.value)}
             >
-              {colony.dwarves
-                .filter(
-                  (dwarf) =>
-                    dwarf.status !== "expedition" &&
-                    dwarf.status !== "resting" &&
-                    dwarf.status !== "forging",
-                )
-                .map((dwarf) => (
-                  <option key={dwarf.id} value={dwarf.id}>
-                    {dwarf.name}
-                  </option>
-                ))}
+              {colony.dwarves.filter(isEligibleScout).map((dwarf) => (
+                <option key={dwarf.id} value={dwarf.id}>
+                  {dwarf.name}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -190,6 +181,18 @@ export function ColonyPage() {
                 ? `${selected.name} is ready. A result returns in one request…`
                 : "No scout available. A result returns in one request…"}
           </p>
+          {colony.dwarves
+            .filter(
+              (dwarf) =>
+                dwarf.status === "expedition" &&
+                typeof dwarf.countdown === "number",
+            )
+            .map((dwarf) => (
+              <p className="craft-progress" key={dwarf.id}>
+                Expedition ready in: {dwarf.countdown}s — {dwarf.name} is
+                travelling
+              </p>
+            ))}
         </section>
 
         <Chronicle activities={activities} />
