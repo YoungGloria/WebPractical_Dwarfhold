@@ -55,7 +55,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
-import { assignJob } from "../../colonyActions";
+import { assignJob } from "../../domain/actions/assignment";
 import { advanceDay, isProducing, production } from "../../simulation";
 import { Layout } from "../../pages/Layout";
 import {

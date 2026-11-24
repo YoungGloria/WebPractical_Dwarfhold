@@ -11,16 +11,18 @@ import {
 } from "../simulation";
 import type { JobType, Dwarf, ColonyState } from "../domain/types";
 import {
-  assignJob,
+  completeCraftToolAction,
   completeCraftWeaponAction,
-  completeExpeditionAction,
   craftToolAction,
   craftWeaponAction,
+} from "../domain/actions/crafting";
+import {
+  completeExpeditionAction,
   failExpeditionAction,
   startExpeditionAction,
-  toggleToolAction,
-  completeCraftToolAction,
-} from "../colonyActions";
+} from "../domain/actions/expedition";
+import { assignJob } from "../domain/actions/assignment";
+import { toggleToolAction } from "../domain/actions/equipment";
 import {
   bootstrapColony,
   clearColonySave,

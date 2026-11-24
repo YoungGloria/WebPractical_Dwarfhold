@@ -9,6 +9,7 @@ describe("colony simulation", () => {
       dwarves: [
         {
           id: "d1",
+          species: "dwarf",
           name: "Brom",
           title: "",
           icon: "",
@@ -19,6 +20,7 @@ describe("colony simulation", () => {
       ],
       log: [],
       logSeq: 0,
+      sirOneUperJoined: false,
     };
     expect(advanceDay(state)).toMatchObject({
       day: 2,

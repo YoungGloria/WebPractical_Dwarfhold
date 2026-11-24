@@ -41,15 +41,17 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
+import { assignJob } from "../../domain/actions/assignment";
 import {
-  assignJob,
-  completeExpeditionAction,
   craftToolAction,
   craftWeaponAction,
+} from "../../domain/actions/crafting";
+import {
+  completeExpeditionAction,
   failExpeditionAction,
   startExpeditionAction,
-  toggleToolAction,
-} from "../../colonyActions";
+} from "../../domain/actions/expedition";
+import { toggleToolAction } from "../../domain/actions/equipment";
 import { advanceDay, isProducing } from "../../simulation";
 import { createInitialState } from "../../domain/initialState";
 import {

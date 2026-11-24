@@ -48,7 +48,7 @@ import {
   completeCraftWeaponAction,
   craftToolAction,
   craftWeaponAction,
-} from "../../colonyActions";
+} from "../../domain/actions/crafting";
 import {
   advanceDay,
   FORGE_TOOL_SECONDS,

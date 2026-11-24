@@ -1,4 +1,4 @@
-import { failExpeditionAction } from "./colonyActions";
+import { failExpeditionAction } from "./domain/actions/expedition";
 import { createInitialState } from "./domain/initialState";
 import { log, MAX_LOG } from "./stateUtils";
 import type {

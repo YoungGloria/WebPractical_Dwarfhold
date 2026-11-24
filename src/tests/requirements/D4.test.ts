@@ -50,13 +50,13 @@
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { beginExpedition, RetryableError } from "../../services/expeditionApi";
+import { assignJob } from "../../domain/actions/assignment";
+import { craftToolAction } from "../../domain/actions/crafting";
 import {
-  assignJob,
   completeExpeditionAction,
-  craftToolAction,
   failExpeditionAction,
   startExpeditionAction,
-} from "../../colonyActions";
+} from "../../domain/actions/expedition";
 import { advanceDay } from "../../simulation";
 import type {
   ColonyState,

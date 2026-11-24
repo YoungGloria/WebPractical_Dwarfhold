@@ -54,8 +54,8 @@ import {
   completeCraftWeaponAction,
   craftToolAction,
   craftWeaponAction,
-  toggleToolAction,
-} from "../../colonyActions";
+} from "../../domain/actions/crafting";
+import { toggleToolAction } from "../../domain/actions/equipment";
 import { advanceDay, FORGE_WEAPON_SECONDS } from "../../simulation";
 import { DwarfRoster } from "../../components/DwarfRoster";
 import { ResourceBar } from "../../components/ResourceBar";
