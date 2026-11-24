@@ -66,7 +66,7 @@ import {
   EXPEDITION_SECONDS,
   FORGE_TOOL_SECONDS,
   FORGE_WEAPON_SECONDS,
-} from "../../simulation";
+} from "../../config/constants";
 import type { ColonyState, Dwarf } from "../../domain/types";
 
 class MemoryStorage implements StorageLike {

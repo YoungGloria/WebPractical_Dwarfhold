@@ -13,3 +13,6 @@ export const canScout = (dwarf: Dwarf): boolean =>
 
 export const canForge = (dwarf: Dwarf): boolean =>
   dwarf.species !== "knight" && !isBusy(dwarf) && Boolean(dwarf.specialty);
+
+export const isProducing = (dwarf: Dwarf): boolean =>
+  dwarf.assignment !== null && !isBusy(dwarf);

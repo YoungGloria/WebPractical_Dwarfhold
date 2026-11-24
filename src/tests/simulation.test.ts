@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { advanceDay } from "./simulation";
-import type { ColonyState } from "./domain/types";
+import { advanceDay } from "../domain/simulation/advanceDay";
+import type { ColonyState } from "../domain/types";
 describe("colony simulation", () => {
   it("produces assigned resources and feeds the company", () => {
     const state: ColonyState = {

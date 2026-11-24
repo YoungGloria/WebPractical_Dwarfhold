@@ -1,5 +1,5 @@
 import type { ColonyState, JobType } from "../types";
-import { jobLabel } from "../../simulation";
+import { jobLabel } from "../../config/jobs";
 import { log } from "../log";
 import { canAssignJob } from "../rules/availability";
 

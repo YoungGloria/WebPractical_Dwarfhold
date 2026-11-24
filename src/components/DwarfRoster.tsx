@@ -1,4 +1,4 @@
-import { jobLabel } from "../simulation";
+import { jobLabel } from "../config/jobs";
 import type { ColonyState, Dwarf, JobType } from "../domain/types";
 
 const jobs: Exclude<JobType, null>[] = ["woodcutting", "mining", "farming"];

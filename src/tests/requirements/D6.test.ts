@@ -52,7 +52,8 @@ import {
   startExpeditionAction,
 } from "../../domain/actions/expedition";
 import { toggleToolAction } from "../../domain/actions/equipment";
-import { advanceDay, isProducing } from "../../simulation";
+import { advanceDay } from "../../domain/simulation/advanceDay";
+import { isProducing } from "../../domain/rules/availability";
 import { createInitialState } from "../../domain/initialState";
 import {
   bootstrapColony,
@@ -76,7 +77,7 @@ import type {
   DwarfStatus,
   JobType,
 } from "../../domain/types";
-import { isFamine } from "../../utils";
+import { isFamine } from "../../domain/rules/famine";
 
 const KNIGHT_ID = "sir-one-uper";
 

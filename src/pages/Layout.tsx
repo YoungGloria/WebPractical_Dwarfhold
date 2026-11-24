@@ -2,7 +2,7 @@ import { NavLink, Outlet } from "react-router";
 import { ResourceBar } from "../components/ResourceBar";
 import { useColony } from "../state/ColonyContext";
 import { Popup } from "../components/Popup";
-import { isFamine } from "../utils";
+import { isFamine } from "../domain/rules/famine";
 
 export function Layout() {
   const {

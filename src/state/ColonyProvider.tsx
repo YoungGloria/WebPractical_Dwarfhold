@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { beginExpedition } from "../services/expeditionApi";
 import {
-  advanceDay,
-  DayPhase,
-  getDayPhase,
-  EXPEDITION_SECONDS,
   DAY_MS,
+  EXPEDITION_SECONDS,
   FORGE_TOOL_SECONDS,
   FORGE_WEAPON_SECONDS,
-} from "../simulation";
+} from "../config/constants";
+import { advanceDay } from "../domain/simulation/advanceDay";
+import { getDayPhase, type DayPhase } from "../domain/simulation/dayPhase";
 import type { JobType, Dwarf, ColonyState } from "../domain/types";
 import {
   completeCraftToolAction,

@@ -57,7 +57,7 @@ import {
   failExpeditionAction,
   startExpeditionAction,
 } from "../../domain/actions/expedition";
-import { advanceDay } from "../../simulation";
+import { advanceDay } from "../../domain/simulation/advanceDay";
 import type {
   ColonyState,
   Dwarf,

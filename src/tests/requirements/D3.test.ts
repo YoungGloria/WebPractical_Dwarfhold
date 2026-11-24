@@ -49,11 +49,11 @@ import {
   craftToolAction,
   craftWeaponAction,
 } from "../../domain/actions/crafting";
+import { advanceDay } from "../../domain/simulation/advanceDay";
 import {
-  advanceDay,
   FORGE_TOOL_SECONDS,
   FORGE_WEAPON_SECONDS,
-} from "../../simulation";
+} from "../../config/constants";
 import { Recepie } from "../../components/Recepie";
 import type {
   ColonyState,

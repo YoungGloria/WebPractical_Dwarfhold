@@ -56,7 +56,8 @@ import {
   craftWeaponAction,
 } from "../../domain/actions/crafting";
 import { toggleToolAction } from "../../domain/actions/equipment";
-import { advanceDay, FORGE_WEAPON_SECONDS } from "../../simulation";
+import { advanceDay } from "../../domain/simulation/advanceDay";
+import { FORGE_WEAPON_SECONDS } from "../../config/constants";
 import { DwarfRoster } from "../../components/DwarfRoster";
 import { ResourceBar } from "../../components/ResourceBar";
 import { ForgePage } from "../../pages/ForgePage";

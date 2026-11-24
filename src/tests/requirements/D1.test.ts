@@ -56,7 +56,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
 import { assignJob } from "../../domain/actions/assignment";
-import { advanceDay, isProducing, production } from "../../simulation";
+import { advanceDay } from "../../domain/simulation/advanceDay";
+import { isProducing } from "../../domain/rules/availability";
+import { production } from "../../config/jobs";
 import { Layout } from "../../pages/Layout";
 import {
   ColonyContext,
@@ -68,7 +70,7 @@ import type {
   DwarfStatus,
   JobType,
 } from "../../domain/types";
-import { isFamine } from "../../utils";
+import { isFamine } from "../../domain/rules/famine";
 
 const UNAVAILABLE: DwarfStatus[] = [
   "expedition",

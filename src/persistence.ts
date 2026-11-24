@@ -1,6 +1,6 @@
 import { failExpeditionAction } from "./domain/actions/expedition";
 import { createInitialState } from "./domain/initialState";
-import { log, MAX_LOG } from "./stateUtils";
+import { log } from "./domain/log";
 import type {
   Activity,
   ColonyState,
@@ -15,11 +15,9 @@ import {
   EXPEDITION_SECONDS,
   FORGE_TOOL_SECONDS,
   FORGE_WEAPON_SECONDS,
-} from "./simulation";
-
-export const SAVE_KEY = "dwarfhold.saves";
-export const SAVE_VERSION = 1;
-export const MAX_SAVES = 5;
+} from "./config/constants";
+import { SAVE_KEY, SAVE_VERSION, MAX_SAVES, MAX_LOG } from "./config/constants";
+export { SAVE_KEY, SAVE_VERSION, MAX_SAVES, MAX_LOG } from "./config/constants";
 
 // Single source of truth for allowed values.
 // New statuses/jobs/resources must be added here and in the matching parse function.

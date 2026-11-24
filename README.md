@@ -105,8 +105,8 @@ Destinations `crystal-cave` and `old-mine` have rewards. `blocked-pass` is the p
 - `src/state/ColonyProvider.tsx` owns shared colony state, the simulation timer, and game actions.
 - `src/state/ColonyContext.ts` exposes the shared state through `useColony`.
 - `src/pages/` contains the shared layout, colony page, and forge page.
-- `src/simulation.ts` contains the production table and daily simulation transition.
-- `src/types.ts` defines workers, jobs, statuses, resources, and activity records.
+- `src/config/` contains constants and the job and recipe tables.
+- `src/domain/` contains types, rules, actions, and simulation transitions.
 - `src/api.ts` contains the expedition HTTP request.
 - `src/components/` contains the roster, resource display, and shared chronicle.
 - `server/index.js` implements the local expedition service.

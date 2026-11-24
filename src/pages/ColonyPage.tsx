@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Chronicle } from "../components/Chronicle";
 import { DwarfRoster } from "../components/DwarfRoster";
-import { jobLabel, production, isProducing } from "../simulation";
+import { jobLabel, production } from "../config/jobs";
+import { isProducing } from "../domain/rules/availability";
 import { useColony } from "../state/ColonyContext";
 import type { ResourceKey } from "../domain/types";
-import { isFamine } from "../utils";
+import { isFamine } from "../domain/rules/famine";
 
 export function ColonyPage() {
   const {
