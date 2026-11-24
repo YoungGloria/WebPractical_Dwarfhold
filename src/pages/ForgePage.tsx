@@ -8,16 +8,8 @@ export function ForgePage() {
   return (
     <div className="forge-layout">
       <section className="panel forge">
-        <RecipePanel
-          colony={colony}
-          recipeId="tool"
-          onCraft={craftTool}
-        />
-        <RecipePanel
-          colony={colony}
-          recipeId="weapon"
-          onCraft={craftWeapon}
-        />
+        <RecipePanel colony={colony} recipeId="tool" onCraft={craftTool} />
+        <RecipePanel colony={colony} recipeId="weapon" onCraft={craftWeapon} />
       </section>
 
       <Chronicle activities={activities} />

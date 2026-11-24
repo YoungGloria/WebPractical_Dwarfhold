@@ -9,11 +9,7 @@ interface RecipePanelProps {
   onCraft: (dwarfId: string) => void;
 }
 
-export function RecipePanel({
-  colony,
-  recipeId,
-  onCraft,
-}: RecipePanelProps) {
+export function RecipePanel({ colony, recipeId, onCraft }: RecipePanelProps) {
   const [specialistId, setSpecialistId] = useState("");
   const recipe = recipes[recipeId];
 
@@ -63,10 +59,7 @@ export function RecipePanel({
           <span>
             {recipe.output} {recipe.icon}
           </span>
-          <button
-            disabled={!canStart}
-            onClick={() => onCraft(specialistId)}
-          >
+          <button disabled={!canStart} onClick={() => onCraft(specialistId)}>
             {recipe.buttonText}
           </button>
         </div>

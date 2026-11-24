@@ -15,8 +15,8 @@
  *        - the roster shows a knight-specific label instead of "Generalist"/"Skilled in"
  *
  * [D6.3] Own production capability
- *        - the knight produces +1 on every basic job (woodcutting, mining, farming)
- *        - the bonus combines with equipped tools and with the famine modifier
+ *        - the knight produces +1 on every basic job
+ *        - the bonus combines with equipped tools and famine
  *        - the UI net food line includes the knight bonus
  *
  * [D6.4] Own crafting/expedition limitation
@@ -34,8 +34,7 @@
  *        - the knight cannot join a second time after a reload
  *        - legacy saves and invalid species/flags are handled
  *
- * The decision "destination === crystal-cave" lives in ColonyProvider.runExpedition
- * and is therefore not testable as a pure function (see it.todo below).
+ * The recruiting destination decision lives in config/destinations.ts.
  */
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -77,6 +76,7 @@ import type {
   JobType,
 } from "../../domain/types";
 import { isFamine } from "../../domain/rules/famine";
+import { destinationRecruitsKnight } from "../../config/destinations";
 
 const KNIGHT_ID = "sir-one-uper";
 
@@ -375,10 +375,12 @@ describe("D6 non-dwarf resident", () => {
 
       expect(state).toEqual(before);
     });
+  });
 
-    it.todo(
-      "only the crystal-cave destination triggers recruitment (condition lives in ColonyProvider.runExpedition; extract it into a pure function to test it)",
-    );
+  it("only marks the crystal cave as a recruiting destination", () => {
+    expect(destinationRecruitsKnight("crystal-cave")).toBe(true);
+    expect(destinationRecruitsKnight("old-mine")).toBe(false);
+    expect(destinationRecruitsKnight("blocked-pass")).toBe(false);
   });
 
   describe("[D6.2] recognisably different from a dwarf", () => {
@@ -481,7 +483,7 @@ describe("D6 non-dwarf resident", () => {
       expect(next.resources.stone).toBe(9 + 2 + 1 + 1);
     });
 
-    it("combines the knight bonus with the famine modifier", () => {
+    it("combines the knight bonus with famine", () => {
       const state = makeState(
         [
           makeKnight({ assignment: "mining", status: "working" }),
@@ -492,11 +494,11 @@ describe("D6 non-dwarf resident", () => {
       const next = advanceDay(state);
 
       expect(isFamine(state)).toBe(true);
-      expect(next.resources.stone).toBe(9 + (2 - 1 + 1));
+      expect(next.resources.stone).toBe(9 + 2);
       expect(next.resources.food).toBe(0);
     });
 
-    it("combines knight bonus, famine modifier and tool", () => {
+    it("combines knight, tool and famine modifiers", () => {
       const state = makeState(
         [
           makeKnight({
@@ -509,7 +511,7 @@ describe("D6 non-dwarf resident", () => {
         { resources: { wood: 14, stone: 9, food: 0, tools: 1, weapons: 0 } },
       );
 
-      expect(advanceDay(state).resources.stone).toBe(9 + (2 - 1 + 1 + 1));
+      expect(advanceDay(state).resources.stone).toBe(9 + 3);
     });
 
     it("produces the same values on repeated calculations", () => {

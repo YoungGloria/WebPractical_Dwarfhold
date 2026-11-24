@@ -37,8 +37,8 @@
  *
  * [D1.6] Food shortage consequence
  *        - famine is detected only when rations are insufficient (boundary: exact fit)
- *        - all productive jobs receive exactly the deterministic famine modifier (-1)
- *        - the famine modifier combines correctly with an equipped tool
+ *        - famine subtracts one from each productive resource
+ *        - tool and knight bonuses remain additive but can be offset by famine
  *        - famine is announced in the chronicle exactly once per affected day
  *        - food never drops below zero
  *
@@ -59,6 +59,7 @@ import { assignJob } from "../../domain/actions/assignment";
 import { advanceDay } from "../../domain/simulation/advanceDay";
 import { isProducing } from "../../domain/rules/availability";
 import { production } from "../../config/jobs";
+import { dailyYield, projectedOutput } from "../../domain/rules/production";
 import { Layout } from "../../pages/Layout";
 import {
   ColonyContext,
@@ -242,6 +243,19 @@ describe("D1 consistent daily simulation", () => {
   });
 
   describe("daily production", () => {
+    it("calculates an inhabitant yield and the colony preview through shared rules", () => {
+      const dwarf = makeDwarf("dwarf-1", "woodcutting", "working", {
+        hasTool: true,
+        species: "knight",
+      });
+      const state = makeState([dwarf]);
+      state.resources.food = 0;
+
+      expect(dailyYield(dwarf, false)).toEqual({ wood: 5 });
+      expect(dailyYield(dwarf, true)).toEqual({ wood: 4 });
+      expect(projectedOutput(state)).toEqual({ wood: 4, food: -1 });
+    });
+
     it("produces wood for a woodcutting dwarf", () => {
       const next = advanceDay(makeState([makeDwarf("dwarf-1", "woodcutting")]));
 
@@ -550,7 +564,7 @@ describe("D1 consistent daily simulation", () => {
       expect(isFamine(state)).toBe(true);
     });
 
-    it("reduces every productive job by exactly one resource during famine", () => {
+    it("applies the base and famine modifier to woodcutting, mining and farming", () => {
       const state = makeState([
         makeDwarf("dwarf-1", "woodcutting"),
         makeDwarf("dwarf-2", "mining"),
@@ -562,7 +576,7 @@ describe("D1 consistent daily simulation", () => {
 
       expect(next.resources.wood).toBe(state.resources.wood + 2);
       expect(next.resources.stone).toBe(state.resources.stone + 1);
-      expect(next.resources.food).toBe(1);
+      expect(next.resources.food).toBe(state.resources.food);
     });
 
     it("does not reduce production when rations exactly cover the company", () => {
@@ -572,7 +586,7 @@ describe("D1 consistent daily simulation", () => {
       expect(advanceDay(state).resources.wood).toBe(state.resources.wood + 3);
     });
 
-    it("applies the famine modifier to every productive dwarf of the same job", () => {
+    it("applies famine to every productive woodcutter", () => {
       const state = makeState([
         makeDwarf("dwarf-1", "woodcutting"),
         makeDwarf("dwarf-2", "woodcutting"),
@@ -593,7 +607,7 @@ describe("D1 consistent daily simulation", () => {
       expect(advanceDay(state).resources.stone).toBe(state.resources.stone);
     });
 
-    it("combines the famine modifier with an equipped tool (+1 -1)", () => {
+    it("combines a tool bonus with the famine modifier", () => {
       const state = makeState([
         makeDwarf("dwarf-1", "woodcutting", "working", { hasTool: true }),
       ]);
@@ -715,16 +729,13 @@ describe("D1 consistent daily simulation", () => {
       expect(renderLayout(state)).not.toContain("Famine");
     });
 
-    it("announced famine penalty matches the simulated penalty", () => {
+    it("announces the simulated famine penalty", () => {
       const state = makeState([makeDwarf("dwarf-1", "woodcutting")]);
       state.resources.food = 0;
-      const normal = makeState([makeDwarf("dwarf-1", "woodcutting")]);
+      const html = renderLayout(state);
 
-      const penalty =
-        advanceDay(normal).resources.wood - advanceDay(state).resources.wood;
-
-      expect(penalty).toBe(1);
-      expect(renderLayout(state)).toContain(`reduced by ${penalty}`);
+      expect(advanceDay(state).resources.wood).toBe(state.resources.wood + 2);
+      expect(html).toContain("reduced by 1");
     });
   });
 });

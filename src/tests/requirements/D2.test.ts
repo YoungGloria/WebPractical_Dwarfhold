@@ -366,13 +366,12 @@ describe("D2 tools, weapons and equipment", () => {
       expect(state.resources.stone).toBe(9 + 30);
     });
 
-    it("combines with the famine modifier", () => {
+    it("combines its bonus with the famine modifier", () => {
       const state = makeState([
         makeDwarf("dwarf-1", "mining", "working", { hasTool: true }),
       ]);
       state.resources.food = 0;
 
-      // 2 - 1 + 1
       expect(advanceDay(state).resources.stone).toBe(9 + 2);
     });
 

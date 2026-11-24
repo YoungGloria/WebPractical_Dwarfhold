@@ -51,4 +51,3 @@ export interface Activity {
   message: string;
   tone?: "good" | "warning";
 }
-

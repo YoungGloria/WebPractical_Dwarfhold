@@ -13,6 +13,7 @@ import {
 import type { ColonyState } from "../../domain/types";
 import { beginExpedition } from "../../services/expeditionApi";
 import type { PendingExpedition } from "../../persistence/schema";
+import { destinationRecruitsKnight } from "../../config/destinations";
 
 interface ExpeditionRunnerArgs {
   colony: ColonyState;
@@ -43,7 +44,8 @@ export function useExpeditionRunner({
       const result = await beginExpedition(dwarfId, destination, requestId);
       pendingRequests.current.delete(dwarfId);
       const shouldRecruit =
-        !colonyRef.current.sirOneUperJoined && destination === "crystal-cave";
+        !colonyRef.current.sirOneUperJoined &&
+        destinationRecruitsKnight(destination);
       setColony((current) => {
         const next = completeExpeditionAction(
           current,

@@ -102,9 +102,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       const next = {
         ...updated,
         dwarves: updated.dwarves.map((d) =>
-          d.id === dwarfId
-            ? { ...d, countdown: recipe.durationSeconds }
-            : d,
+          d.id === dwarfId ? { ...d, countdown: recipe.durationSeconds } : d,
         ),
       };
       colonyRef.current = next;
@@ -133,9 +131,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       const next = {
         ...updated,
         dwarves: updated.dwarves.map((d) =>
-          d.id === dwarfId
-            ? { ...d, countdown: recipe.durationSeconds }
-            : d,
+          d.id === dwarfId ? { ...d, countdown: recipe.durationSeconds } : d,
         ),
       };
       colonyRef.current = next;

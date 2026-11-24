@@ -1,7 +1,4 @@
-import {
-  FORGE_TOOL_SECONDS,
-  FORGE_WEAPON_SECONDS,
-} from "./constants";
+import { FORGE_TOOL_SECONDS, FORGE_WEAPON_SECONDS } from "./constants";
 
 export type RecipeId = "tool" | "weapon";
 

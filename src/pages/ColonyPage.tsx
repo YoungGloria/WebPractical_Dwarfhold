@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { Chronicle } from "../components/Chronicle";
 import { DwarfRoster } from "../components/DwarfRoster";
 import { jobLabel, production } from "../config/jobs";
-import { isProducing } from "../domain/rules/availability";
 import { useColony } from "../state/ColonyContext";
-import type { ResourceKey } from "../domain/types";
-import { isFamine } from "../domain/rules/famine";
+import { projectedOutput } from "../domain/rules/production";
+import {
+  destinations,
+  getDestination,
+  type DestinationId,
+} from "../config/destinations";
 
 export function ColonyPage() {
   const {
@@ -23,7 +26,7 @@ export function ColonyPage() {
     dwarf.status !== "forging_Tool" &&
     dwarf.status !== "forging_Weapon";
 
-  const [destination, setDestination] = useState("crystal-cave");
+  const [destination, setDestination] = useState<DestinationId>("crystal-cave");
   const [expeditionDwarf, setExpeditionDwarf] = useState(
     () => colony.dwarves.find(isEligibleScout)?.id ?? "",
   ); // Default to the first eligable scout
@@ -47,36 +50,8 @@ export function ColonyPage() {
     (dwarf) => dwarf.status === "expedition",
   );
 
-  const dailyOutput = colony.dwarves.reduce<Record<ResourceKey, number>>(
-    (total, dwarf) => {
-      if (dwarf.assignment && isProducing(dwarf)) {
-        let resourceModifier = 0;
-        if (isFamine(colony)) {
-          resourceModifier -= 1;
-        }
-        if (dwarf.hasTool) {
-          resourceModifier += 1;
-        }
-        if (dwarf.species === "knight") {
-          resourceModifier += 1;
-        }
-        // ensure the dwarf has an assignment and is producing (ie not on an expedition)
-        const output = production[dwarf.assignment];
-        Object.entries(output).forEach(([resource, amount]) => {
-          total[resource as ResourceKey] += amount
-            ? amount + resourceModifier
-            : 0;
-        });
-      }
-      return total;
-    },
-    {
-      wood: 0,
-      stone: 0,
-      food: -colony.dwarves.length,
-      tools: 0,
-    },
-  );
+  const dailyOutput = projectedOutput(colony);
+  const netFood = dailyOutput.food ?? 0;
 
   return (
     <div className="dashboard">
@@ -122,9 +97,9 @@ export function ColonyPage() {
 
           <div className="net-line">
             <span>NET FOOD AFTER MEALS</span>
-            <strong className={dailyOutput.food >= 0 ? "gain" : "loss"}>
-              {dailyOutput.food >= 0 ? "+" : ""}
-              {dailyOutput.food}
+            <strong className={netFood >= 0 ? "gain" : "loss"}>
+              {netFood >= 0 ? "+" : ""}
+              {netFood}
             </strong>
           </div>
         </section>
@@ -158,11 +133,16 @@ export function ColonyPage() {
             Destination
             <select
               value={destination}
-              onChange={(event) => setDestination(event.target.value)}
+              onChange={(event) => {
+                const next = getDestination(event.target.value);
+                if (next) setDestination(next.id);
+              }}
             >
-              <option value="crystal-cave">Crystal Cave</option>
-              <option value="old-mine">The Old Mine</option>
-              <option value="blocked-pass">Blocked Pass</option>
+              {destinations.map((item) => (
+                <option key={item.id} value={item.id} title={item.description}>
+                  {item.label}
+                </option>
+              ))}
             </select>
           </label>
 
