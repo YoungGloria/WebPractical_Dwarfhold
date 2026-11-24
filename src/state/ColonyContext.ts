@@ -11,6 +11,8 @@ export interface ColonyContextValue {
   expeditionPending: boolean;
   restoreNotice: PopupNotice | null;
   dismissRestoreNotice: () => void;
+  raidNotice: PopupNotice | null;
+  dismissRaidNotice: () => void;
   newGame: () => void; // currently not used, but may be used for implementing a "New Game" button in the future
   togglePaused: () => void;
   assignDwarf: (id: string, assignment: JobType) => void;

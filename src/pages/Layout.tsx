@@ -13,6 +13,8 @@ export function Layout() {
     daySecondsLeft,
     restoreNotice,
     dismissRestoreNotice,
+    raidNotice,
+    dismissRaidNotice,
   } = useColony();
 
   const hasActiveCrafts = colony.dwarves.some(
@@ -56,7 +58,7 @@ export function Layout() {
         <NavLink to="/forge">Forge</NavLink>
       </nav>
 
-      {isFamine(useColony().colony) ? (
+      {isFamine(colony) ? (
         <Popup
           header="Famine"
           subHeader="It has been a long time since they have eaten."
@@ -71,6 +73,8 @@ export function Layout() {
       {restoreNotice && (
         <Popup {...restoreNotice} onClose={dismissRestoreNotice} />
       )}
+
+      {raidNotice && <Popup {...raidNotice} onClose={dismissRaidNotice} />}
 
       <ResourceBar resources={colony.resources} />
       <Outlet />
