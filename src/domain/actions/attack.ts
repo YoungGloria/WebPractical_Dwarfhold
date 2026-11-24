@@ -2,7 +2,12 @@ import {ColonyState, PopupNotice} from "../types";
 import {log} from "../log";
 
 
-export function raidAction(state: ColonyState): { ColonyState; PopupNotice } {
+interface RaidActionResult {
+    colony: ColonyState;
+    notice: PopupNotice;
+}
+
+export function raidAction(state: ColonyState): RaidActionResult {
     if (state.resources.weapons >= 3) {
         state.resources.weapons -= 3;
         state = log(state, "You were raided. The raid was defeated.", "good");
