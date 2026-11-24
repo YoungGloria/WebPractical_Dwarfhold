@@ -71,6 +71,7 @@ function makeDwarf(
 ): Dwarf {
   return {
     id,
+    species: "dwarf",
     name: `Dwarf ${id}`,
     title: "",
     icon: "",
@@ -91,6 +92,7 @@ function makeState(
     dwarves,
     log: [],
     logSeq: 0,
+    sirOneUperJoined: false,
   };
 }
 

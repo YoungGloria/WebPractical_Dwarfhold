@@ -65,6 +65,7 @@ function makeDwarf(
 ): Dwarf {
   return {
     id,
+    species: "dwarf",
     name: `Dwarf ${id}`,
     title: "",
     icon: "",
@@ -88,6 +89,7 @@ function makeState(dwarves: Dwarf[] = [specialist()]): ColonyState {
     dwarves,
     log: [],
     logSeq: 0,
+    sirOneUperJoined: false,
   };
 }
 
