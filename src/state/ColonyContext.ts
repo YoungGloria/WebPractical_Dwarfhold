@@ -1,5 +1,11 @@
 import { createContext, useContext } from "react";
-import type { Activity, ColonyState, Dwarf, JobType } from "../types";
+import type {
+  Activity,
+  ColonyState,
+  JobType,
+  PopupNotice,
+  Dwarf,
+} from "../types";
 import { DayPhase } from "../simulation";
 import type { RestoreNotice } from "../persistence";
 
@@ -12,6 +18,8 @@ export interface ColonyContextValue {
   expeditionPending: boolean;
   restoreNotice: RestoreNotice | null;
   dismissRestoreNotice: () => void;
+  raidNotice: PopupNotice | null;
+  dismissRaidNotice: () => void;
   newGame: () => void; // currently not used, but may be used for implementing a "New Game" button in the future
   togglePaused: () => void;
   assignDwarf: (id: string, assignment: JobType) => void;

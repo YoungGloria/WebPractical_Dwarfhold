@@ -10,10 +10,18 @@ const outcomes = {
   "crystal-cave": {
     rewards: { stone: 8, tools: 1 },
     message: "The scout found a crystal seam and an abandoned mason's tool.",
+    raid: false,
   },
   "old-mine": {
     rewards: { stone: 12, wood: 2 },
     message: "The old mine still holds good stone and usable supports.",
+    raid: false,
+  },
+  "abandoned-fortifications": {
+    rewards: { stone: 4, wood: 3, tools: 1, weapons: 1 },
+    message:
+      "The abandoned fortifications are already looted. But there where some tools and weapons under a collapsed building.",
+    raid: true,
   },
 };
 

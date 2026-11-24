@@ -9,7 +9,7 @@ import {
   FORGE_TOOL_SECONDS,
   FORGE_WEAPON_SECONDS,
 } from "../simulation";
-import type { JobType, Dwarf, ColonyState } from "../types";
+import type { JobType, Dwarf, PopupNotice, ColonyState } from "../types";
 import {
   assignJob,
   completeCraftWeaponAction,
@@ -17,6 +17,7 @@ import {
   craftToolAction,
   craftWeaponAction,
   failExpeditionAction,
+  raidAction,
   startExpeditionAction,
   toggleToolAction,
   completeCraftToolAction,
@@ -37,6 +38,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   const [colony, setColony] = useState(boot.colony);
   const [paused, setPaused] = useState(boot.paused);
   const [restoreNotice, setRestoreNotice] = useState(boot.notice);
+  const [raidNotice, setRaidNotice] = useState(null);
 
   const firstSave = useRef(true); // Needed to ensure multiple reloads do not fill the ring buffer with duplicate snapshots
   const inFlight = useRef(new Set<string>()); // Track dwarves currently on expeditions
@@ -198,31 +200,31 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       }
 
       /*setColony((current) => {
-        let next: ColonyState = dayAdvanced ? advanceDay(current) : current;
-        completedThisTick.length = 0;
+              let next: ColonyState = dayAdvanced ? advanceDay(current) : current;
+              completedThisTick.length = 0;
 
-        next = advanceDwarfCountdowns(next, (task) => {
-          completedThisTick.push(task);
-        });
+              next = advanceDwarfCountdowns(next, (task) => {
+                completedThisTick.push(task);
+              });
 
-        for (const task of completedThisTick) {
-          if (task.kind === "tool") {
-            next = completeCraftToolAction(next, task.dwarfId);
-          } else if (task.kind === "weapon") {
-            next = completeCraftWeaponAction(next, task.dwarfId);
-          }
-        }
+              for (const task of completedThisTick) {
+                if (task.kind === "tool") {
+                  next = completeCraftToolAction(next, task.dwarfId);
+                } else if (task.kind === "weapon") {
+                  next = completeCraftWeaponAction(next, task.dwarfId);
+                }
+              }
 
-        colonyRef.current = next; // Update the colonyRef to the latest state for snapshot purposes
-        return next;
-      });
+              colonyRef.current = next; // Update the colonyRef to the latest state for snapshot purposes
+              return next;
+            });
 
-      for (const task of completedThisTick) {
-        if (task.kind === "expedition") {
-          void runExpedition(task.dwarfId, task.destination, task.requestId); // handoff to async function to handle expedition completion
-        }
-      }
-        */
+            for (const task of completedThisTick) {
+              if (task.kind === "expedition") {
+                void runExpedition(task.dwarfId, task.destination, task.requestId); // handoff to async function to handle expedition completion
+              }
+            }
+              */
 
       // Update the snapshot every tick to ensure the elapsed time is saved
       saveSnapshot(snapshot(), undefined, "replaceHead");
@@ -313,15 +315,21 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
       pendingRequests.current.delete(dwarfId); // before setColony -> consistent save
       const shouldRecruitSirOneUper =
         !colonyRef.current.sirOneUperJoined && destination === "crystal-cave";
-      setColony((current) =>
-        completeExpeditionAction(
+      setColony((current) => {
+        current = completeExpeditionAction(
           current,
           dwarfId,
           result.rewards,
           result.message,
           shouldRecruitSirOneUper,
-        ),
-      );
+        );
+        if (result.raid) {
+          const res = raidAction(current);
+          current = res.colony as ColonyState;
+          setRaidNotice(res.notice as PopupNotice);
+        }
+        return current;
+      });
     } catch (error) {
       pendingRequests.current.delete(dwarfId);
       setColony((current) =>
@@ -366,6 +374,8 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     window.location.reload(); // nothing is saved on unload, so the reset sticks
   }
 
+  console.log(colony.dwarves);
+
   const expeditionPending = colony.dwarves.some(
     (d) => d.status === "expedition",
   );
@@ -379,6 +389,8 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     daySecondsLeft,
     restoreNotice,
     dismissRestoreNotice: () => setRestoreNotice(null),
+    raidNotice,
+    dismissRaidNotice: () => setRaidNotice(null),
     newGame,
     togglePaused: () => setPaused((value) => !value),
     assignDwarf,

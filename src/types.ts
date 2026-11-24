@@ -43,6 +43,7 @@ export interface ExpeditionResult {
   status: "completed";
   rewards: Partial<Resources>;
   message: string;
+  raid: boolean;
 }
 
 export interface Activity {
@@ -58,4 +59,10 @@ export interface Recepies {
   output: number;
   //type: "tool" | "weapon"
   icon: "⚒️" | "⚔️";
+}
+
+export interface PopupNotice {
+  header: string;
+  subHeader: string;
+  message: string;
 }
