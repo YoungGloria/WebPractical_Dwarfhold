@@ -6,3 +6,4 @@ export const SAVE_KEY = "dwarfhold.saves";
 export const SAVE_VERSION = 1;
 export const MAX_SAVES = 5;
 export const MAX_LOG = 8;
+export const RAID_DEFENSE_WEAPONS = 3;
