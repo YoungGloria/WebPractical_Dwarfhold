@@ -1,4 +1,5 @@
-export type DestinationId = "crystal-cave" | "old-mine" | "blocked-pass" | "abandoned-fortifications" ;
+export type DestinationId =
+  "crystal-cave" | "old-mine" | "blocked-pass" | "abandoned-fortifications";
 
 export interface ExpeditionDestination {
   id: DestinationId;
@@ -36,7 +37,7 @@ export const destinations: readonly ExpeditionDestination[] = [
     description: "An abandoned fortification protecting the cave.",
     recruitsKnight: false,
     attack: true,
-  }
+  },
 ];
 
 export function getDestination(id: string): ExpeditionDestination | undefined {

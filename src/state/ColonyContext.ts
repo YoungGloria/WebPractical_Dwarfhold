@@ -1,5 +1,11 @@
 import { createContext, useContext } from "react";
-import type { Activity, ColonyState, Dwarf, JobType, PopupNotice } from "../domain/types";
+import type {
+  Activity,
+  ColonyState,
+  Dwarf,
+  JobType,
+  PopupNotice,
+} from "../domain/types";
 import type { DayPhase } from "../domain/simulation/dayPhase";
 
 export interface ColonyContextValue {

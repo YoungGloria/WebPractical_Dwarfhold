@@ -5,7 +5,8 @@ import type {
   DwarfStatus,
   DwarfSpecies,
   JobType,
-  Resources, PopupNotice,
+  Resources,
+  PopupNotice,
 } from "../domain/types";
 import {
   DAY_MS,
