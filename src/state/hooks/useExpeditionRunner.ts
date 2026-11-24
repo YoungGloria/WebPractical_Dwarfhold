@@ -10,7 +10,8 @@ import {
   failExpeditionAction,
   startExpeditionAction,
 } from "../../domain/actions/expedition";
-import type { ColonyState } from "../../domain/types";
+import { raidAction } from "../../domain/actions/attack";
+import type { ColonyState, PopupNotice } from "../../domain/types";
 import { beginExpedition } from "../../services/expeditionApi";
 import type { PendingExpedition } from "../../persistence/schema";
 import { destinationRecruitsKnight } from "../../config/destinations";
@@ -19,6 +20,7 @@ interface ExpeditionRunnerArgs {
   colony: ColonyState;
   colonyRef: RefObject<ColonyState>;
   setColony: Dispatch<SetStateAction<ColonyState>>;
+  setRaidNotice: Dispatch<SetStateAction<PopupNotice | null>>;
   pendingRequests: RefObject<Map<string, PendingExpedition>>;
   saveDuringDay: () => void;
 }
@@ -27,6 +29,7 @@ export function useExpeditionRunner({
   colony,
   colonyRef,
   setColony,
+  setRaidNotice,
   pendingRequests,
   saveDuringDay,
 }: ExpeditionRunnerArgs) {
@@ -46,18 +49,27 @@ export function useExpeditionRunner({
       const shouldRecruit =
         !colonyRef.current.sirOneUperJoined &&
         destinationRecruitsKnight(destination);
-      setColony((current) => {
-        const next = completeExpeditionAction(
-          current,
-          dwarfId,
-          result.rewards,
-          result.message,
-          shouldRecruit,
-        );
+
+      const current = colonyRef.current;
+      let next = completeExpeditionAction(
+        current,
+        dwarfId,
+        result.rewards,
+        result.message,
+        shouldRecruit,
+      );
+
+      if (next !== current && result.raid) {
+        const raid = raidAction(next);
+        next = raid.colony;
+        setRaidNotice(raid.notice);
+      }
+
+      if (next !== current) {
         colonyRef.current = next;
+        setColony(next);
         saveDuringDay();
-        return next;
-      });
+      }
     } catch (error) {
       pendingRequests.current.delete(dwarfId);
       setColony((current) => {

@@ -3,7 +3,7 @@ import { recipes } from "../config/recipes";
 import { assignJob } from "../domain/actions/assignment";
 import { craftToolAction, craftWeaponAction } from "../domain/actions/crafting";
 import { toggleToolAction } from "../domain/actions/equipment";
-import type { Dwarf, JobType } from "../domain/types";
+import type { Dwarf, JobType, PopupNotice } from "../domain/types";
 import { bootstrapColony } from "../persistence/bootstrap";
 import { clearColonySave } from "../persistence/ring";
 import type { PendingExpedition } from "../persistence/schema";
@@ -17,6 +17,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
   const [colony, setColony] = useState(boot.colony);
   const [paused, setPaused] = useState(boot.paused);
   const [restoreNotice, setRestoreNotice] = useState(boot.notice);
+  const [raidNotice, setRaidNotice] = useState<PopupNotice | null>(null);
 
   const colonyRef = useRef(colony);
   colonyRef.current = colony;
@@ -36,6 +37,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     colony,
     colonyRef,
     setColony,
+    setRaidNotice,
     pendingRequests,
     saveDuringDay: autosave.saveDuringDay,
   });
@@ -154,6 +156,8 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     daySecondsLeft,
     restoreNotice,
     dismissRestoreNotice: () => setRestoreNotice(null),
+    raidNotice,
+    dismissRaidNotice: () => setRaidNotice(null),
     newGame,
     togglePaused: () => setPaused((value) => !value),
     assignDwarf,
