@@ -55,15 +55,14 @@ import { toggleToolAction } from "../../domain/actions/equipment";
 import { advanceDay } from "../../domain/simulation/advanceDay";
 import { isProducing } from "../../domain/rules/availability";
 import { createInitialState } from "../../domain/initialState";
+import { bootstrapColony } from "../../persistence/bootstrap";
+import { loadSnapshot, saveSnapshot } from "../../persistence/ring";
 import {
-  bootstrapColony,
-  loadSnapshot,
-  saveSnapshot,
-  SAVE_VERSION,
   validateSnapshot,
   type Snapshot,
   type StorageLike,
-} from "../../persistence";
+} from "../../persistence/schema";
+import { SAVE_VERSION } from "../../config/constants";
 import { DwarfRoster } from "../../components/DwarfRoster";
 import { Recepie } from "../../components/Recepie";
 import { ColonyPage } from "../../pages/ColonyPage";

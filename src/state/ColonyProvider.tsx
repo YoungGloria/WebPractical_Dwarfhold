@@ -22,13 +22,10 @@ import {
 } from "../domain/actions/expedition";
 import { assignJob } from "../domain/actions/assignment";
 import { toggleToolAction } from "../domain/actions/equipment";
-import {
-  bootstrapColony,
-  clearColonySave,
-  saveSnapshot,
-  SAVE_VERSION,
-  type PendingExpedition,
-} from "../persistence";
+import { bootstrapColony } from "../persistence/bootstrap";
+import { clearColonySave, saveSnapshot } from "../persistence/ring";
+import { SAVE_VERSION } from "../config/constants";
+import type { PendingExpedition } from "../persistence/schema";
 import { ColonyContext, type ColonyContextValue } from "./ColonyContext";
 
 export function ColonyProvider({ children }: { children: ReactNode }) {

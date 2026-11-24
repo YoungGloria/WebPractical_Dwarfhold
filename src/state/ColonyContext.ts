@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 import type { Activity, ColonyState, Dwarf, JobType } from "../domain/types";
 import type { DayPhase } from "../domain/simulation/dayPhase";
-import type { RestoreNotice } from "../persistence";
+import type { RestoreNotice } from "../persistence/schema";
 
 export interface ColonyContextValue {
   colony: ColonyState;

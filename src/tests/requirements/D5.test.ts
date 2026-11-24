@@ -49,18 +49,18 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Popup } from "../../components/Popup";
 import { createInitialState } from "../../domain/initialState";
+import { bootstrapColony } from "../../persistence/bootstrap";
 import {
-  bootstrapColony,
   clearColonySave,
   loadSnapshot,
-  MAX_SAVES,
-  SAVE_KEY,
-  SAVE_VERSION,
   saveSnapshot,
+} from "../../persistence/ring";
+import {
   validateSnapshot,
   type Snapshot,
   type StorageLike,
-} from "../../persistence";
+} from "../../persistence/schema";
+import { MAX_SAVES, SAVE_KEY, SAVE_VERSION } from "../../config/constants";
 import {
   DAY_MS,
   EXPEDITION_SECONDS,
