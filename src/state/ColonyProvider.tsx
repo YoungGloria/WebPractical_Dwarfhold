@@ -256,7 +256,12 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
 
   function craftTool(dwarfId: string) {
     const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
-    if (isDwarfUnavailable(dwarf) || !dwarf?.specialty) return;
+    if (
+      isDwarfUnavailable(dwarf) ||
+      !dwarf?.specialty ||
+      dwarf.species === "knight"
+    )
+      return;
 
     //TODO: provider should not know recipe state - move resources to provider?
     if (colony.resources.wood < 3 || colony.resources.stone < 2) return;
@@ -274,7 +279,12 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
 
   function craftWeapon(dwarfId: string) {
     const dwarf = colony.dwarves.find((item) => item.id === dwarfId);
-    if (isDwarfUnavailable(dwarf) || !dwarf?.specialty) return;
+    if (
+      isDwarfUnavailable(dwarf) ||
+      !dwarf?.specialty ||
+      dwarf.species === "knight"
+    )
+      return;
 
     //TODO: provider should not know recipe state - move resources to provider?
     if (colony.resources.wood < 4 || colony.resources.stone < 3) return;
@@ -327,7 +337,7 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
 
   function sendExpedition(dwarfId: string, destination: string) {
     const dwarf = colony.dwarves.find((d) => d.id === dwarfId);
-    if (isDwarfUnavailable(dwarf)) return;
+    if (isDwarfUnavailable(dwarf) || dwarf?.species === "knight") return;
     if (pendingRequests.current.has(dwarfId) || inFlight.current.has(dwarfId))
       return; // Prevent sending a dwarf on an expedition if they are already on one or if the expedition is in flight - optional chaining is not possible because dwarf not found -> undefined -> false
 

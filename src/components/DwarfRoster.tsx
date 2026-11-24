@@ -35,9 +35,12 @@ export function DwarfRoster({ dwarves, onAssign, state, onToggleTool }: Props) {
             dwarf.status === "resting" ||
             dwarf.status === "forging_Tool" ||
             dwarf.status === "forging_Weapon";
-          const specialty = dwarf.specialty
-            ? `Skilled in ${jobLabel(dwarf.specialty)}`
-            : "Generalist";
+          const specialty =
+            dwarf.species === "knight"
+              ? "Knight (+1 basic yield)"
+              : dwarf.specialty
+                ? `Skilled in ${jobLabel(dwarf.specialty)}`
+                : "Generalist";
 
           return (
             <article className={isAway ? "dwarf away" : "dwarf"} key={dwarf.id}>

@@ -2,11 +2,20 @@ import type { ColonyState, Dwarf, JobType, ResourceKey } from "./types";
 import { jobLabel } from "./simulation";
 import { log } from "./stateUtils";
 
+// Determins if a dwarf will produce resources from basic jobs: woodcutting, mining, farming
 const isBusy = (dwarf: Dwarf) =>
   dwarf.status === "expedition" ||
   dwarf.status === "resting" ||
   dwarf.status === "forging_Tool" ||
   dwarf.status === "forging_Weapon";
+
+// Determins if a dwarf is eligable to go on expeditions and forge
+const isNoEligableCharacter = (dwarf: Dwarf) =>
+  dwarf.status === "expedition" ||
+  dwarf.status === "resting" ||
+  dwarf.status === "forging_Tool" ||
+  dwarf.status === "forging_Weapon" ||
+  dwarf.species === "knight";
 
 export function assignJob(
   state: ColonyState,
@@ -37,7 +46,7 @@ export function craftToolAction(
   dwarfId: string,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
-  if (!dwarf?.specialty || isBusy(dwarf)) return state;
+  if (!dwarf?.specialty || isNoEligableCharacter(dwarf)) return state;
 
   if (state.resources.wood < 3 || state.resources.stone < 2) {
     return state;
@@ -88,7 +97,7 @@ export function craftWeaponAction(
   dwarfId: string,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
-  if (!dwarf?.specialty || isBusy(dwarf)) return state;
+  if (!dwarf?.specialty || isNoEligableCharacter(dwarf)) return state;
 
   if (state.resources.wood < 4 || state.resources.stone < 3) {
     return state;
@@ -144,7 +153,7 @@ export function startExpeditionAction(
   destination: string,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
-  if (!dwarf || isBusy(dwarf)) return state; // unknown, travelling, resting or forging
+  if (!dwarf || isNoEligableCharacter(dwarf)) return state; // unknown, travelling, resting or forging
   const dwarves = state.dwarves.map((d) =>
     d.id === dwarfId ? { ...d, status: "expedition" as const } : d,
   );
