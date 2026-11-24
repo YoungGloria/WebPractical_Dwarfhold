@@ -311,12 +311,15 @@ export function ColonyProvider({ children }: { children: ReactNode }) {
     try {
       const result = await beginExpedition(dwarfId, destination, requestId);
       pendingRequests.current.delete(dwarfId); // before setColony -> consistent save
+      const shouldRecruitSirOneUper =
+        !colonyRef.current.sirOneUperJoined && destination === "crystal-cave";
       setColony((current) =>
         completeExpeditionAction(
           current,
           dwarfId,
           result.rewards,
           result.message,
+          shouldRecruitSirOneUper,
         ),
       );
     } catch (error) {

@@ -164,11 +164,23 @@ export function startExpeditionAction(
   );
 }
 
+const SIR_ONE_UPER: Dwarf = {
+  id: "sir-one-uper",
+  species: "knight",
+  name: "Sir One Uper",
+  title: "Produces 1 extra",
+  icon: "🤴",
+  assignment: null,
+  status: "idle",
+  hasTool: false,
+};
+
 export function completeExpeditionAction(
   state: ColonyState,
   dwarfId: string,
   rewards: Partial<Record<ResourceKey, number>>,
   message: string,
+  recruitSirOneUper = false,
 ): ColonyState {
   const dwarf = state.dwarves.find((d) => d.id === dwarfId);
   if (dwarf?.status !== "expedition") return state; // using optional chaining to check: Dwarf not found or not on an expedition?
@@ -184,6 +196,19 @@ export function completeExpeditionAction(
   const dwarves = state.dwarves.map((d) =>
     d.id === dwarfId ? { ...d, status: "resting" as const } : d,
   );
+
+  if (recruitSirOneUper && !state.sirOneUperJoined) {
+    return log(
+      {
+        ...state,
+        resources,
+        dwarves: [...dwarves, SIR_ONE_UPER],
+        sirOneUperJoined: true,
+      },
+      message,
+      "good",
+    );
+  }
 
   return log({ ...state, resources, dwarves }, message, "good");
 }

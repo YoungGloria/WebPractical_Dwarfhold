@@ -43,19 +43,9 @@ export function createInitialState(): ColonyState {
         status: "idle",
         hasTool: false,
       },
-      {
-        id: "sir-one-uper",
-        species: "knight",
-        name: "Sir One Uper",
-        title: "Produces 1 extra",
-        icon: "🤴",
-        assignment: null,
-        status: "idle",
-        hasTool: false,
-      },
     ],
     log: [],
     logSeq: 0,
-    sirOneUperJoined: true,
+    sirOneUperJoined: false,
   };
 }
