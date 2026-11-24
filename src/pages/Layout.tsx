@@ -14,6 +14,8 @@ export function Layout() {
     craftCountdowns,
     restoreNotice,
     dismissRestoreNotice,
+    raidNotice,
+    dismissRaidNotice,
   } = useColony();
 
   const hasActiveCrafts = Object.keys(craftCountdowns).length > 0;
@@ -53,20 +55,24 @@ export function Layout() {
         <NavLink to="/forge">Forge</NavLink>
       </nav>
 
-      {isFamine(useColony().colony) ? (
-        <Popup
-          header="Famine"
-          subHeader="It has been a long time since they have eaten."
-          message={
-            "Your people are starving. Feed them.\nYour workers output is reduced by 1."
-          }
-        />
-      ) : (
-        ""
-      )}
-
       {restoreNotice && (
         <Popup {...restoreNotice} onClose={dismissRestoreNotice} />
+      )}
+
+      {isFamine(useColony().colony) ? (
+          <Popup
+              header="Famine"
+              subHeader="It has been a long time since they have eaten."
+              message={
+                "Your people are starving. Feed them.\nYour workers output is reduced by 1."
+              }
+          />
+      ) : (
+          ""
+      )}
+
+      {raidNotice && (
+          <Popup {...raidNotice} onClose={dismissRaidNotice} />
       )}
 
       <ResourceBar resources={colony.resources} />
