@@ -2,7 +2,9 @@
 
 Dwarfhold is a small browser-based colony and resource-management game. You are the warden of **Stonehome**, a new settlement beneath Emberpeak. Your three dwarves gather supplies, eat from the shared food stores, forge equipment, and explore locations beyond the hold.
 
-This is a partially completed starter for the Advanced Web Development practical exam. It is already playable, but it is not yet a finished game. Investigate its existing behavior and extend it according to the [Requirements](REQUIREMENTS.md).
+This is the completed assignment for the Advanced Web Development practical exam. It was extended and adjusted to meet the [Requirements](REQUIREMENTS.md).
+
+Additional design choices are documented in [Decisions](DECISIONS.md).
 
 ## Project Diary
 The project diary for the practiacal exam can be accessed [here](https://bokuprod-my.sharepoint.com/:w:/g/personal/gloriayoung_office365_boku_ac_at/IQALL-N8-O0XTKg9cjG5ZVxqAenqxQCpctWFAYE8sYUiN3Y?e=GuaPc9).
